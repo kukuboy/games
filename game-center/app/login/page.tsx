@@ -40,35 +40,35 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-semibold text-gray-900 mb-4">欢迎回来</h1>
-          <p className="text-xl text-gray-500">登录到游戏中心</p>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">登录</h1>
+          <p className="text-gray-500 mt-1">欢迎回到游戏中心</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass-card">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6">
           {error && (
-            <div className="mb-8 p-5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-lg">
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
               {error}
             </div>
           )}
 
-          <div className="space-y-7">
+          <div className="space-y-4">
             <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">邮箱</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">邮箱</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="请输入邮箱"
                 required
-                className="input-field"
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">密码</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">密码</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -76,14 +76,14 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="请输入密码"
                   required
-                  className="input-field pr-16"
+                  className="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -91,21 +91,21 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-3 text-lg"
+              className="w-full py-2.5 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <LogIn className="w-6 h-6" />
+                  <LogIn className="w-4 h-4" />
                   <span>登录</span>
                 </>
               )}
             </button>
           </div>
 
-          <div className="mt-10 text-center">
-            <p className="text-lg text-gray-500">
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-500">
               还没有账号？{' '}
               <Link href="/register" className="text-blue-500 hover:text-blue-600 font-medium">
                 立即注册
@@ -114,10 +114,8 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="mt-8 p-6 rounded-2xl bg-white border border-gray-200">
-          <p className="text-base text-gray-500 text-center mb-3">测试账号（演示用）：</p>
-          <p className="text-lg text-gray-600 text-center">邮箱：player1@game.com</p>
-          <p className="text-lg text-gray-600 text-center">密码：demo123</p>
+        <div className="mt-4 p-4 rounded-lg bg-white border border-gray-200">
+          <p className="text-xs text-gray-500 text-center">测试账号：player1@game.com / demo123</p>
         </div>
       </div>
     </div>
