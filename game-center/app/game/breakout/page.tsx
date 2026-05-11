@@ -17,22 +17,6 @@ const BRICK_HEIGHT = 20;
 type Brick = { x: number; y: number; width: number; height: number; points: number; active: boolean; color: string };
 type Ball = { x: number; y: number; dx: number; dy: number };
 
-function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-}
-
 export default function BreakoutGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { isAuthenticated } = useAuth();
@@ -43,15 +27,17 @@ export default function BreakoutGame() {
   const [bricks, setBricks] = useState<Brick[]>([]);
   const [score, setLocalScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-  const [showGameOver, setShowGameOver] = useState(false);
-  const [gameKey, setGameKey] = useState(0);
+  const [isStarted, setIsStarted] = useState(false);
 
-  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const ballRef = useRef(ball);
   const paddleRef = useRef(paddleX);
+  const gameOverRef = useRef(false);
+  const statusRef = useRef(gameStatus);
 
-  useEffect(() => { paddleRef.current = paddleX; }, [paddleX]);
+  useEffect(() => { statusRef.current = gameStatus; }, [gameStatus]);
   useEffect(() => { ballRef.current = ball; }, [ball]);
+  useEffect(() => { paddleRef.current = paddleX; }, [paddleX]);
+  useEffect(() => { gameOverRef.current = gameOver; }, [gameOver]);
 
   const createBricks = useCallback(() => {
     const brickWidth = (CANVAS_WIDTH - 40) / BRICK_COLS;
@@ -75,51 +61,47 @@ export default function BreakoutGame() {
     return newBricks;
   }, []);
 
-  const draw = useCallback((ctx: CanvasRenderingContext2D, currentPaddleX: number, currentBall: Ball, currentBricks: Brick[]) => {
-    ctx.fillStyle = '#e8e4e0';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    currentBricks.forEach(brick => {
-      if (!brick.active) return;
-      ctx.fillStyle = brick.color;
-      ctx.strokeStyle = brick.color;
-      ctx.lineWidth = 2;
-      drawRoundedRect(ctx, brick.x, brick.y, brick.width, brick.height, 4);
-    });
-
-    ctx.fillStyle = '#7c9eb2';
-    ctx.fillRect(currentPaddleX, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
-
-    ctx.fillStyle = '#e6a4b4';
-    ctx.beginPath();
-    ctx.arc(currentBall.x, currentBall.y, BALL_RADIUS, 0, Math.PI * 2);
-    ctx.fill();
-  }, []);
-
-  useEffect(() => {
+  const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    draw(ctx, paddleX, ball, bricks);
-  }, [paddleX, ball, bricks, draw]);
 
-  const handleStartGame = useCallback(() => {
+    ctx.fillStyle = '#e8e4e0';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    bricks.forEach(brick => {
+      if (!brick.active) return;
+      ctx.fillStyle = brick.color;
+      ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+    });
+
+    ctx.fillStyle = '#7c9eb2';
+    ctx.fillRect(paddleRef.current, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
+
+    ctx.fillStyle = '#e6a4b4';
+    ctx.beginPath();
+    ctx.arc(ballRef.current.x, ballRef.current.y, BALL_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+  }, [bricks]);
+
+  const startGame = () => {
     setBricks(createBricks());
     setBall({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 80, dx: 4, dy: -4 });
     setPaddleX(CANVAS_WIDTH / 2 - PADDLE_WIDTH / 2);
     setLocalScore(0);
     setGameOver(false);
-    setShowGameOver(false);
     setGameStatus('playing');
-    setGameKey(prev => prev + 1);
-  }, [createBricks, setGameStatus]);
+    setIsStarted(true);
+  };
 
   useEffect(() => {
-    if (gameStatus !== 'playing' || gameOver) return;
+    if (!isStarted || statusRef.current !== 'playing' || gameOverRef.current) return;
 
-    const loop = () => {
-      let currentBall = ballRef.current;
+    const gameLoop = setInterval(() => {
+      if (statusRef.current !== 'playing' || gameOverRef.current) return;
+
+      let currentBall = { ...ballRef.current };
       let currentPaddle = paddleRef.current;
       let currentScore = score;
       let currentBricks = [...bricks];
@@ -145,9 +127,8 @@ export default function BreakoutGame() {
 
       if (currentBall.y + BALL_RADIUS > CANVAS_HEIGHT) {
         setGameOver(true);
-        setShowGameOver(true);
         setGameStatus('gameover');
-        if (isAuthenticated) saveScore(score, 'breakout');
+        if (isAuthenticated) saveScore(currentScore, 'breakout');
         return;
       }
 
@@ -162,7 +143,6 @@ export default function BreakoutGame() {
         ) {
           brick.active = false;
           currentScore += brick.points;
-          setLocalScore(currentScore);
           currentBall.dy = -currentBall.dy;
           break;
         }
@@ -174,38 +154,38 @@ export default function BreakoutGame() {
 
       setBall(currentBall);
       setBricks(currentBricks);
+      setLocalScore(currentScore);
+    }, 16);
 
-      if (gameStatus === 'playing' && !gameOver) {
-        gameLoopRef.current = setTimeout(loop, 16);
-      }
-    };
+    return () => clearInterval(gameLoop);
+  }, [isStarted, isAuthenticated, saveScore, createBricks, score]);
 
-    gameLoopRef.current = setTimeout(loop, 16);
-    return () => { if (gameLoopRef.current) clearTimeout(gameLoopRef.current); };
-  }, [gameStatus, bricks, score, gameOver, isAuthenticated, saveScore, createBricks, setGameStatus]);
+  useEffect(() => {
+    draw();
+  }, [ball, bricks, paddleX, draw]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (gameStatus !== 'playing' || gameOver) return;
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isStarted || statusRef.current !== 'playing' || gameOverRef.current) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     setPaddleX(Math.max(0, Math.min(CANVAS_WIDTH - PADDLE_WIDTH, x - PADDLE_WIDTH / 2)));
-  }, [gameStatus, gameOver]);
+  };
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (gameStatus !== 'playing' || gameOver) return;
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isStarted || statusRef.current !== 'playing' || gameOverRef.current) return;
     if (e.key === 'ArrowLeft') setPaddleX(prev => Math.max(0, prev - 20));
     if (e.key === 'ArrowRight') setPaddleX(prev => Math.min(CANVAS_WIDTH - PADDLE_WIDTH, prev + 20));
-  }, [gameStatus, gameOver]);
+  };
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+  }, []);
 
   return (
-    <div className="min-h-screen pb-12" key={gameKey}>
+    <div className="min-h-screen pb-12">
       <div className="pt-28 px-6 pb-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
@@ -220,52 +200,45 @@ export default function BreakoutGame() {
 
       <div className="px-6">
         <div className="max-w-2xl mx-auto flex justify-center">
-          <div className="relative">
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
-              onMouseMove={handleMouseMove}
-              className="rounded-2xl shadow-lg cursor-pointer"
-            />
-            
-            {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
-                <div className="clay-card text-center">
-                  <p className="text-sm opacity-50 mb-2">游戏结束</p>
-                  <p className="text-2xl font-semibold mb-4">{score}</p>
-                  <button onClick={handleStartGame} className="clay-button clay-button-primary">
-                    再来一局
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
-                <button onClick={handleStartGame} className="clay-button clay-button-primary">
-                  开始游戏
-                </button>
-              </div>
-            )}
-          </div>
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            onMouseMove={handleMouseMove}
+            className="rounded-2xl shadow-lg cursor-pointer"
+          />
         </div>
 
-        <div className="max-w-2xl mx-auto mt-6 flex justify-center gap-4">
-          {gameStatus === 'playing' && (
+        {gameOver && (
+          <div className="max-w-2xl mx-auto mt-6">
+            <div className="clay-card text-center">
+              <p className="text-sm opacity-50 mb-2">游戏结束</p>
+              <p className="text-2xl font-semibold mb-4">{score} 分</p>
+              <button onClick={startGame} className="clay-button clay-button-primary">
+                再来一局
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!isStarted && !gameOver && (
+          <div className="max-w-2xl mx-auto mt-6 text-center">
+            <button onClick={startGame} className="clay-button clay-button-primary">
+              开始游戏
+            </button>
+          </div>
+        )}
+
+        {isStarted && !gameOver && (
+          <div className="max-w-2xl mx-auto mt-6 flex justify-center gap-4">
             <button onClick={() => setGameStatus('paused')} className="clay-button py-2 px-4 text-sm">
               暂停
             </button>
-          )}
-          {gameStatus === 'paused' && (
-            <button onClick={() => setGameStatus('playing')} className="clay-button py-2 px-4 text-sm">
-              继续
+            <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
+              重新开始
             </button>
-          )}
-          <button onClick={handleStartGame} className="clay-button py-2 px-4 text-sm">
-            重新开始
-          </button>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
