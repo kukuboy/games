@@ -23,14 +23,14 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-              <Gamepad2 className="w-4 h-4 text-white" />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+        <div className="flex items-center justify-between h-[72px]">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <Gamepad2 className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-semibold text-slate-800">游戏中心</span>
+            <span className="text-xl font-semibold text-gray-900 tracking-tight">游戏中心</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
@@ -40,10 +40,10 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive(item.href)
-                      ? 'bg-indigo-50 text-indigo-600'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-orange-50 text-orange-600'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -56,11 +56,12 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-slate-500">欢迎，</span>
-                <span className="text-sm font-medium text-slate-800">{user?.nickname}</span>
+                <div className="text-sm text-gray-400">
+                  <span className="text-gray-600 font-medium">{user?.nickname}</span>
+                </div>
                 <button
                   onClick={logout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>退出</span>
@@ -70,13 +71,13 @@ export default function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all"
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all"
                 >
                   登录
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition-all"
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg hover:shadow-orange-500/25 transition-all"
                 >
                   注册
                 </Link>
@@ -85,7 +86,7 @@ export default function Navbar() {
           </div>
 
           <button
-            className="md:hidden p-2 text-slate-600"
+            className="md:hidden p-2.5 rounded-xl hover:bg-gray-100 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -94,8 +95,8 @@ export default function Navbar() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-200">
-          <div className="px-4 py-4 space-y-1">
+        <div className="md:hidden bg-white border-t border-gray-100">
+          <div className="px-5 py-4 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -103,10 +104,10 @@ export default function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all ${
                     isActive(item.href)
-                      ? 'bg-indigo-50 text-indigo-600'
-                      : 'text-slate-600 hover:bg-slate-50'
+                      ? 'bg-orange-50 text-orange-600'
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -115,18 +116,18 @@ export default function Navbar() {
               );
             })}
             
-            <div className="pt-4 border-t border-slate-200 space-y-2">
+            <div className="pt-4 border-t border-gray-100 space-y-2">
               {isAuthenticated ? (
                 <>
-                  <div className="px-4 py-2 text-sm text-slate-500">
-                    欢迎，<span className="font-medium text-slate-800">{user?.nickname}</span>
+                  <div className="px-4 py-2.5 text-sm text-gray-500">
+                    <span className="font-medium text-gray-800">{user?.nickname}</span>
                   </div>
                   <button
                     onClick={() => {
                       logout();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50"
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-600 hover:bg-gray-50"
                   >
                     <LogOut className="w-5 h-5" />
                     <span>退出登录</span>
@@ -137,14 +138,14 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block w-full px-4 py-3 text-center rounded-lg text-slate-600 hover:bg-slate-50"
+                    className="block w-full px-4 py-3.5 text-center rounded-xl text-gray-600 hover:bg-gray-50"
                   >
                     登录
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block w-full px-4 py-3 text-center rounded-lg bg-indigo-500 text-white hover:bg-indigo-600"
+                    className="block w-full px-4 py-3.5 text-center rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white"
                   >
                     注册
                   </Link>
