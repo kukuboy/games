@@ -24,6 +24,21 @@ const PIECES: Piece[] = [
   { shape: [[0, 1, 1], [1, 1, 0]], color: '#f4a4a4' },
 ];
 
+function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
 export default function TetrisGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { isAuthenticated } = useAuth();
@@ -38,6 +53,7 @@ export default function TetrisGame() {
   const [score, setLocalScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
 
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const lastDropRef = useRef(0);
@@ -96,9 +112,7 @@ export default function TetrisGame() {
       for (let col = 0; col < GRID_WIDTH; col++) {
         if (currentGrid[row][col]) {
           ctx.fillStyle = currentGrid[row][col]!;
-          ctx.beginPath();
-          ctx.roundRect(col * BLOCK_SIZE + 2, row * BLOCK_SIZE + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4, 4);
-          ctx.fill();
+          drawRoundedRect(ctx, col * BLOCK_SIZE + 2, row * BLOCK_SIZE + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4, 4);
         }
       }
     }
@@ -110,9 +124,7 @@ export default function TetrisGame() {
             const x = (px + col) * BLOCK_SIZE;
             const y = (py + row) * BLOCK_SIZE;
             ctx.fillStyle = piece.color;
-            ctx.beginPath();
-            ctx.roundRect(x + 2, y + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4, 4);
-            ctx.fill();
+            drawRoundedRect(ctx, x + 2, y + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4, 4);
           }
         }
       }
@@ -155,7 +167,7 @@ export default function TetrisGame() {
     draw(ctx, grid, currentPiece, currentX, currentY);
   }, [grid, currentPiece, currentX, currentY, draw]);
 
-  const startGame = useCallback(() => {
+  const handleStartGame = useCallback(() => {
     const piece = createNewPiece();
     setGrid(Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(null)));
     setCurrentPiece(piece);
@@ -165,6 +177,7 @@ export default function TetrisGame() {
     setGameOver(false);
     setShowGameOver(false);
     setGameStatus('playing');
+    setGameKey(prev => prev + 1);
     lastDropRef.current = Date.now();
   }, [createNewPiece, setGameStatus]);
 
@@ -210,7 +223,7 @@ export default function TetrisGame() {
   }, [gameStatus, currentPiece, currentX, currentY, grid, gameOver, isAuthenticated, score, createNewPiece, checkCollision, mergePiece, clearLines, saveScore, setGameStatus]);
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12" key={gameKey}>
       <div className="pt-28 px-6 pb-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
@@ -234,11 +247,11 @@ export default function TetrisGame() {
             />
             
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
                 <div className="clay-card text-center">
                   <p className="text-sm opacity-50 mb-2">游戏结束</p>
                   <p className="text-2xl font-semibold mb-4">{score}</p>
-                  <button onClick={startGame} className="clay-button clay-button-primary">
+                  <button onClick={handleStartGame} className="clay-button clay-button-primary">
                     再来一局
                   </button>
                 </div>
@@ -246,12 +259,10 @@ export default function TetrisGame() {
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="clay-card">
-                  <button onClick={startGame} className="clay-button clay-button-primary">
-                    开始游戏
-                  </button>
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
+                <button onClick={handleStartGame} className="clay-button clay-button-primary">
+                  开始游戏
+                </button>
               </div>
             )}
           </div>
@@ -268,7 +279,7 @@ export default function TetrisGame() {
               继续
             </button>
           )}
-          <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
+          <button onClick={handleStartGame} className="clay-button py-2 px-4 text-sm">
             重新开始
           </button>
         </div>

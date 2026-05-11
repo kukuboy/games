@@ -23,6 +23,7 @@ export default function SnakeGame() {
   const [score, setLocalScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
 
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const lastMoveRef = useRef(0);
@@ -49,9 +50,7 @@ export default function SnakeGame() {
 
     currentSnake.forEach((segment, i) => {
       ctx.fillStyle = i === 0 ? '#7c9eb2' : '#9fc5e8';
-      ctx.beginPath();
-      ctx.roundRect(segment.x * CELL_SIZE + 2, segment.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4, 4);
-      ctx.fill();
+      ctx.fillRect(segment.x * CELL_SIZE + 2, segment.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
     });
 
     ctx.fillStyle = '#e6a4b4';
@@ -83,7 +82,7 @@ export default function SnakeGame() {
     draw(ctx, snake, food);
   }, [snake, food, draw]);
 
-  const startGame = useCallback(() => {
+  const handleStartGame = useCallback(() => {
     const initialSnake = [{ x: 10, y: 10 }];
     setSnake(initialSnake);
     setFood(generateFood(initialSnake));
@@ -93,6 +92,7 @@ export default function SnakeGame() {
     setGameOver(false);
     setShowGameOver(false);
     setGameStatus('playing');
+    setGameKey(prev => prev + 1);
     lastMoveRef.current = Date.now();
   }, [generateFood, setGameStatus]);
 
@@ -152,7 +152,7 @@ export default function SnakeGame() {
   }, [gameStatus, snake, food, score, nextDirection, gameOver, checkCollision, generateFood, isAuthenticated, saveScore, setGameStatus]);
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12" key={gameKey}>
       <div className="pt-28 px-6 pb-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
@@ -176,11 +176,11 @@ export default function SnakeGame() {
             />
             
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
                 <div className="clay-card text-center">
                   <p className="text-sm opacity-50 mb-2">游戏结束</p>
                   <p className="text-2xl font-semibold mb-4">{score}</p>
-                  <button onClick={startGame} className="clay-button clay-button-primary">
+                  <button onClick={handleStartGame} className="clay-button clay-button-primary">
                     再来一局
                   </button>
                 </div>
@@ -188,12 +188,10 @@ export default function SnakeGame() {
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="clay-card">
-                  <button onClick={startGame} className="clay-button clay-button-primary">
-                    开始游戏
-                  </button>
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
+                <button onClick={handleStartGame} className="clay-button clay-button-primary">
+                  开始游戏
+                </button>
               </div>
             )}
           </div>
@@ -210,7 +208,7 @@ export default function SnakeGame() {
               继续
             </button>
           )}
-          <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
+          <button onClick={handleStartGame} className="clay-button py-2 px-4 text-sm">
             重新开始
           </button>
         </div>

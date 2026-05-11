@@ -14,8 +14,24 @@ const BRICK_ROWS = 5;
 const BRICK_COLS = 8;
 const BRICK_HEIGHT = 20;
 
-type Brick = { x: number; y: number; width: number; height: number; points: number; active: boolean };
+type Brick = { x: number; y: number; width: number; height: number; points: number; active: boolean; color: string };
 type Ball = { x: number; y: number; dx: number; dy: number };
+
+function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
 
 export default function BreakoutGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,6 +44,7 @@ export default function BreakoutGame() {
   const [score, setLocalScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
 
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const ballRef = useRef(ball);
@@ -51,6 +68,7 @@ export default function BreakoutGame() {
           height: BRICK_HEIGHT,
           points: points[row],
           active: true,
+          color: colors[row],
         });
       }
     }
@@ -63,19 +81,14 @@ export default function BreakoutGame() {
 
     currentBricks.forEach(brick => {
       if (!brick.active) return;
-      ctx.fillStyle = '#f5f2ef';
-      ctx.beginPath();
-      ctx.roundRect(brick.x, brick.y, brick.width, brick.height, 4);
-      ctx.fill();
+      ctx.fillStyle = brick.color;
       ctx.strokeStyle = brick.color;
       ctx.lineWidth = 2;
-      ctx.stroke();
+      drawRoundedRect(ctx, brick.x, brick.y, brick.width, brick.height, 4);
     });
 
     ctx.fillStyle = '#7c9eb2';
-    ctx.beginPath();
-    ctx.roundRect(currentPaddleX, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT, 6);
-    ctx.fill();
+    ctx.fillRect(currentPaddleX, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
 
     ctx.fillStyle = '#e6a4b4';
     ctx.beginPath();
@@ -91,7 +104,7 @@ export default function BreakoutGame() {
     draw(ctx, paddleX, ball, bricks);
   }, [paddleX, ball, bricks, draw]);
 
-  const startGame = useCallback(() => {
+  const handleStartGame = useCallback(() => {
     setBricks(createBricks());
     setBall({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 80, dx: 4, dy: -4 });
     setPaddleX(CANVAS_WIDTH / 2 - PADDLE_WIDTH / 2);
@@ -99,6 +112,7 @@ export default function BreakoutGame() {
     setGameOver(false);
     setShowGameOver(false);
     setGameStatus('playing');
+    setGameKey(prev => prev + 1);
   }, [createBricks, setGameStatus]);
 
   useEffect(() => {
@@ -191,7 +205,7 @@ export default function BreakoutGame() {
   }, [handleKeyDown]);
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12" key={gameKey}>
       <div className="pt-28 px-6 pb-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
@@ -216,11 +230,11 @@ export default function BreakoutGame() {
             />
             
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
                 <div className="clay-card text-center">
                   <p className="text-sm opacity-50 mb-2">游戏结束</p>
                   <p className="text-2xl font-semibold mb-4">{score}</p>
-                  <button onClick={startGame} className="clay-button clay-button-primary">
+                  <button onClick={handleStartGame} className="clay-button clay-button-primary">
                     再来一局
                   </button>
                 </div>
@@ -228,12 +242,10 @@ export default function BreakoutGame() {
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="clay-card">
-                  <button onClick={startGame} className="clay-button clay-button-primary">
-                    开始游戏
-                  </button>
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
+                <button onClick={handleStartGame} className="clay-button clay-button-primary">
+                  开始游戏
+                </button>
               </div>
             )}
           </div>
@@ -250,7 +262,7 @@ export default function BreakoutGame() {
               继续
             </button>
           )}
-          <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
+          <button onClick={handleStartGame} className="clay-button py-2 px-4 text-sm">
             重新开始
           </button>
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame } from '@/contexts/GameContext';
@@ -40,6 +40,7 @@ export default function MemoryGame() {
   const [matches, setMatches] = useState(0);
   const [isGameWon, setIsGameWon] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
 
   const calculateScore = useCallback((moves: number) => {
     return Math.max(100, 1000 - moves * 30);
@@ -101,7 +102,7 @@ export default function MemoryGame() {
     }
   };
 
-  const startGame = () => {
+  const handleStartGame = () => {
     setCards(createCards());
     setFlippedCards([]);
     setMoves(0);
@@ -109,10 +110,11 @@ export default function MemoryGame() {
     setIsGameWon(false);
     setIsProcessing(false);
     setGameStatus('playing');
+    setGameKey(prev => prev + 1);
   };
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12" key={gameKey}>
       <div className="pt-28 px-6 pb-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
@@ -148,7 +150,7 @@ export default function MemoryGame() {
               <div className="clay-card text-center">
                 <p className="text-sm opacity-50 mb-2">完成！</p>
                 <p className="text-2xl font-semibold mb-4">{moves} 步</p>
-                <button onClick={startGame} className="clay-button clay-button-primary">
+                <button onClick={handleStartGame} className="clay-button clay-button-primary">
                   再玩一局
                 </button>
               </div>
@@ -157,7 +159,7 @@ export default function MemoryGame() {
 
           {gameStatus === 'idle' && !isGameWon && (
             <div className="max-w-2xl mx-auto text-center">
-              <button onClick={startGame} className="clay-button clay-button-primary">
+              <button onClick={handleStartGame} className="clay-button clay-button-primary">
                 开始游戏
               </button>
             </div>
@@ -165,7 +167,7 @@ export default function MemoryGame() {
 
           {gameStatus === 'playing' && !isGameWon && (
             <div className="max-w-2xl mx-auto mt-6 flex justify-center">
-              <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
+              <button onClick={handleStartGame} className="clay-button py-2 px-4 text-sm">
                 重新开始
               </button>
             </div>
