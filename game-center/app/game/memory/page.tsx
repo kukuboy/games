@@ -2,16 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trophy, Zap, RotateCcw } from 'lucide-react';
+import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame } from '@/contexts/GameContext';
 
-type Card = {
-  id: number;
-  symbol: string;
-  isFlipped: boolean;
-  isMatched: boolean;
-};
+type Card = { id: number; symbol: string; isFlipped: boolean; isMatched: boolean };
 
 const SYMBOLS = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎸', '🎺'];
 
@@ -27,14 +22,12 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 const createCards = (): Card[] => {
   const selectedSymbols = SYMBOLS.slice(0, 8);
   const cards: Card[] = [];
-  
   selectedSymbols.forEach((symbol, index) => {
     cards.push(
       { id: index * 2, symbol, isFlipped: false, isMatched: false },
       { id: index * 2 + 1, symbol, isFlipped: false, isMatched: false }
     );
   });
-  
   return shuffleArray(cards);
 };
 
@@ -49,7 +42,6 @@ export default function MemoryGame() {
   const [gameTime, setGameTime] = useState(0);
   const [isGameWon, setIsGameWon] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
 
   const calculateScore = useCallback((time: number, moves: number) => {
     const baseScore = 1000;
@@ -60,11 +52,7 @@ export default function MemoryGame() {
 
   useEffect(() => {
     if (gameStatus !== 'playing' || isGameWon) return;
-
-    const interval = setInterval(() => {
-      setGameTime(prev => prev + 1);
-    }, 1000);
-
+    const interval = setInterval(() => setGameTime(prev => prev + 1), 1000);
     return () => clearInterval(interval);
   }, [gameStatus, isGameWon]);
 
@@ -73,9 +61,7 @@ export default function MemoryGame() {
 
     const cardIndex = cards.findIndex(c => c.id === cardId);
     const card = cards[cardIndex];
-
-    if (card.isFlipped || card.isMatched) return;
-    if (flippedCards.length >= 2) return;
+    if (card.isFlipped || card.isMatched || flippedCards.length >= 2) return;
 
     const newCards = [...cards];
     newCards[cardIndex].isFlipped = true;
@@ -95,9 +81,7 @@ export default function MemoryGame() {
       if (firstCard.symbol === secondCard.symbol) {
         setTimeout(() => {
           const matchedCards = newCards.map(c => {
-            if (c.id === firstId || c.id === secondId) {
-              return { ...c, isMatched: true };
-            }
+            if (c.id === firstId || c.id === secondId) return { ...c, isMatched: true };
             return c;
           });
           setCards(matchedCards);
@@ -107,9 +91,7 @@ export default function MemoryGame() {
               setIsGameWon(true);
               setGameStatus('gameover');
               const finalScore = calculateScore(gameTime, moves + 1);
-              if (isAuthenticated) {
-                saveScore(finalScore, 'memory');
-              }
+              if (isAuthenticated) saveScore(finalScore, 'memory');
             }
             return newMatches;
           });
@@ -119,9 +101,7 @@ export default function MemoryGame() {
       } else {
         setTimeout(() => {
           const resetCards = newCards.map(c => {
-            if (c.id === firstId || c.id === secondId) {
-              return { ...c, isFlipped: false };
-            }
+            if (c.id === firstId || c.id === secondId) return { ...c, isFlipped: false };
             return c;
           });
           setCards(resetCards);
@@ -140,7 +120,6 @@ export default function MemoryGame() {
     setGameTime(0);
     setIsGameWon(false);
     setIsProcessing(false);
-    setGameStarted(true);
     setGameStatus('playing');
   };
 
@@ -153,144 +132,96 @@ export default function MemoryGame() {
   const finalScore = calculateScore(gameTime, moves);
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen py-8 px-4 bg-slate-100">
+      <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Link href="/" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+          <Link href="/" className="p-2 rounded-lg bg-white hover:bg-slate-200 transition-colors border border-slate-200">
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
           </Link>
-          <h1 className="text-3xl font-bold text-gradient">记忆翻牌</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">记忆翻牌</h1>
         </div>
 
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-4 gap-3 mb-6">
           {cards.map(card => (
             <button
               key={card.id}
               onClick={() => handleCardClick(card.id)}
-              className={`aspect-square rounded-xl transition-all duration-500 ${
+              className={`aspect-square rounded-xl text-3xl transition-all duration-300 ${
                 card.isFlipped || card.isMatched
-                  ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                  : 'bg-white/10 hover:bg-white/20'
-              } ${
-                card.isMatched
-                  ? 'ring-2 ring-green-400 shadow-lg shadow-green-400/30'
-                  : ''
-              }`}
+                  ? 'bg-white border-2 border-indigo-300'
+                  : 'bg-indigo-500 hover:bg-indigo-600'
+              } ${card.isMatched ? 'ring-2 ring-green-400' : ''}`}
             >
-              <div className={`w-full h-full flex items-center justify-center text-4xl transition-all duration-300 ${
-                card.isFlipped || card.isMatched
-                  ? 'opacity-100 scale-100'
-                  : 'opacity-0 scale-90'
-              }`}>
-                {card.symbol}
-              </div>
+              {(card.isFlipped || card.isMatched) ? card.symbol : '?'}
             </button>
           ))}
         </div>
 
         {isGameWon && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/80 z-50">
-            <div className="text-center p-8 glass-card rounded-2xl max-w-md mx-4">
-              <div className="text-6xl mb-4">🎉</div>
-              <h2 className="text-4xl font-bold text-gradient mb-4">恭喜通关!</h2>
-              <p className="text-gray-400 mb-6">你完成了所有配对</p>
-              
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="p-3 rounded-lg bg-white/5">
-                  <p className="text-2xl font-bold text-cyan-400">{moves}</p>
-                  <p className="text-xs text-gray-400">步数</p>
+          <div className="fixed inset-0 flex items-center justify-center bg-slate-900/80 z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">恭喜通关!</h2>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="p-3 rounded-lg bg-slate-100">
+                  <p className="text-lg font-bold text-slate-700">{moves}</p>
+                  <p className="text-xs text-slate-500">步数</p>
                 </div>
-                <div className="p-3 rounded-lg bg-white/5">
-                  <p className="text-2xl font-bold text-pink-400">{formatTime(gameTime)}</p>
-                  <p className="text-xs text-gray-400">用时</p>
+                <div className="p-3 rounded-lg bg-slate-100">
+                  <p className="text-lg font-bold text-slate-700">{formatTime(gameTime)}</p>
+                  <p className="text-xs text-slate-500">用时</p>
                 </div>
-                <div className="p-3 rounded-lg bg-white/5">
-                  <p className="text-2xl font-bold text-purple-400">{finalScore}</p>
-                  <p className="text-xs text-gray-400">得分</p>
+                <div className="p-3 rounded-lg bg-indigo-100">
+                  <p className="text-lg font-bold text-indigo-600">{finalScore}</p>
+                  <p className="text-xs text-indigo-500">得分</p>
                 </div>
               </div>
-
-              <button
-                onClick={startGame}
-                className="px-6 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-cyan-500 text-white font-bold hover:opacity-90 transition-all flex items-center gap-2 mx-auto"
-              >
-                <RotateCcw className="w-5 h-5" />
-                再玩一局
+              <button onClick={startGame} className="w-full py-2.5 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition-colors flex items-center justify-center gap-2">
+                <RotateCcw className="w-4 h-4" /> 再玩一局
               </button>
             </div>
           </div>
         )}
 
         {gameStatus === 'idle' && !isGameWon && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/80 z-50">
-            <div className="text-center p-8 glass-card rounded-2xl max-w-md mx-4">
-              <div className="text-6xl mb-4">🧠</div>
-              <h2 className="text-3xl font-bold text-gradient mb-4">记忆翻牌</h2>
-              <p className="text-gray-400 mb-6">
-                翻开卡牌找到相同的配对<br />
-                用时越少、步数越少，得分越高
-              </p>
-              <button
-                onClick={startGame}
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-xl hover:opacity-90 transition-all"
-              >
+          <div className="fixed inset-0 flex items-center justify-center bg-slate-900/80 z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">记忆翻牌</h2>
+              <p className="text-slate-500 mb-6">翻开卡牌找到相同的配对</p>
+              <button onClick={startGame} className="w-full py-2.5 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition-colors">
                 开始游戏
               </button>
             </div>
           </div>
         )}
 
-        <div className="flex flex-wrap justify-center gap-4">
-          <div className="glass-card p-4 rounded-xl min-w-[120px]">
-            <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
-              <Zap className="w-4 h-4" />
-              <span>步数</span>
-            </div>
-            <p className="text-3xl font-bold text-cyan-400">{moves}</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <div className="bg-white rounded-xl px-5 py-3 border border-slate-200">
+            <p className="text-sm text-slate-500">步数</p>
+            <p className="text-xl font-bold text-slate-700">{moves}</p>
           </div>
-
-          <div className="glass-card p-4 rounded-xl min-w-[120px]">
-            <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
-              <Trophy className="w-4 h-4" />
-              <span>配对</span>
-            </div>
-            <p className="text-3xl font-bold text-pink-400">{matches}/8</p>
+          <div className="bg-white rounded-xl px-5 py-3 border border-slate-200">
+            <p className="text-sm text-slate-500">配对</p>
+            <p className="text-xl font-bold text-slate-700">{matches}/8</p>
           </div>
-
-          <div className="glass-card p-4 rounded-xl min-w-[120px]">
-            <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
-              <span>用时</span>
-            </div>
-            <p className="text-3xl font-bold text-purple-400">{formatTime(gameTime)}</p>
+          <div className="bg-white rounded-xl px-5 py-3 border border-slate-200">
+            <p className="text-sm text-slate-500">用时</p>
+            <p className="text-xl font-bold text-slate-700">{formatTime(gameTime)}</p>
           </div>
-
           {gameStatus === 'playing' && !isGameWon && (
-            <button
-              onClick={startGame}
-              className="glass-card p-4 rounded-xl min-w-[120px] hover:bg-white/10 transition-colors"
-            >
-              <div className="flex items-center justify-center gap-2 text-gray-400">
-                <RotateCcw className="w-4 h-4" />
-                <span>重开</span>
-              </div>
+            <button onClick={startGame} className="px-5 py-3 rounded-xl bg-slate-200 text-slate-600 hover:bg-slate-300 transition-colors flex items-center gap-2">
+              <RotateCcw className="w-4 h-4" /> 重开
             </button>
           )}
         </div>
 
-        <div className="mt-6 text-center">
-          {!isAuthenticated ? (
-            <div className="p-4 rounded-lg bg-pink-500/10 border border-pink-500/20 inline-block">
-              <p className="text-pink-400">登录后可保存分数并上榜</p>
-              <Link href="/login" className="text-cyan-400 hover:text-cyan-300 ml-2">
-                去登录 →
-              </Link>
+        {!isAuthenticated && (
+          <div className="mt-6 text-center">
+            <div className="inline-block p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+              <p className="text-indigo-500">登录后可保存分数</p>
+              <Link href="/login" className="text-indigo-400 hover:text-indigo-600 ml-1">去登录 →</Link>
             </div>
-          ) : (
-            <div className="text-gray-400 text-sm">
-              最高可达 <span className="text-cyan-400 font-bold">{calculateScore(0, 0)}</span> 分
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

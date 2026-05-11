@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserScoreHistory, getUserHighScores } from '@/lib/storage';
 import { GameType, GameScore } from '@/types';
-import { User, Mail, Calendar, Trophy, ArrowLeft, Gamepad2, TrendingUp, Clock } from 'lucide-react';
+import { User, ArrowLeft, Trophy } from 'lucide-react';
 
 const gameNames: Record<GameType, string> = {
   tetris: '俄罗斯方块',
@@ -25,7 +25,6 @@ const gameIcons: Record<GameType, string> = {
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'stats' | 'history'>('stats');
   const [selectedGame, setSelectedGame] = useState<GameType>('tetris');
   const [history, setHistory] = useState<GameScore[]>([]);
 
@@ -44,8 +43,8 @@ export default function ProfilePage() {
 
   if (loading || !isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-pink-500/30 border-t-pink-500 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-8 h-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -62,188 +61,106 @@ export default function ProfilePage() {
   const gamesPlayed = games.filter(g => getUserHighScores(user.id, g) > 0).length;
 
   return (
-    <div className="min-h-screen py-12 px-4">
+    <div className="min-h-screen py-12 px-4 bg-slate-50">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <Link
-            href="/"
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
+          <Link href="/" className="p-2 rounded-lg bg-white hover:bg-slate-100 transition-colors border border-slate-200">
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
           </Link>
-          <h1 className="text-4xl font-bold text-gradient">个人中心</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">个人中心</h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="glass-card p-6 rounded-2xl lg:col-span-1">
-            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-pink-500 to-cyan-500 flex items-center justify-center text-4xl mb-4">
-              <User className="w-10 h-10 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-center mb-4">{user.nickname}</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-400">
-                <Mail className="w-4 h-4" />
-                <span className="text-sm truncate">{user.email}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl p-5 border border-slate-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                <User className="w-5 h-5 text-indigo-500" />
               </div>
-              <div className="flex items-center gap-3 text-gray-400">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm">
-                  注册于 {new Date(user.createdAt).toLocaleDateString('zh-CN')}
-                </span>
+              <div>
+                <p className="text-sm text-slate-500">用户名</p>
+                <p className="font-semibold text-slate-900">{user.nickname}</p>
               </div>
             </div>
+            <p className="text-sm text-slate-400">{user.email}</p>
           </div>
 
-          <div className="glass-card p-6 rounded-2xl lg:col-span-2">
-            <h3 className="text-lg font-bold mb-4">游戏统计</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-pink-500/10 border border-pink-500/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <Trophy className="w-5 h-5 text-pink-400" />
-                  <span className="text-gray-400 text-sm">总最高分</span>
-                </div>
-                <p className="text-3xl font-bold text-pink-400">
-                  {totalHighScores.toLocaleString()}
-                </p>
-              </div>
-              
-              <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <Gamepad2 className="w-5 h-5 text-cyan-400" />
-                  <span className="text-gray-400 text-sm">游玩游戏数</span>
-                </div>
-                <p className="text-3xl font-bold text-cyan-400">
-                  {gamesPlayed} / {games.length}
-                </p>
-              </div>
-            </div>
+          <div className="bg-white rounded-xl p-5 border border-slate-200">
+            <p className="text-sm text-slate-500 mb-1">总最高分</p>
+            <p className="text-2xl font-bold text-indigo-500">{totalHighScores.toLocaleString()}</p>
+          </div>
 
-            <div className="mt-4 space-y-2">
-              {highScores.map((game) => (
-                <Link
-                  key={game.gameId}
-                  href={`/game/${game.gameId}`}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+          <div className="bg-white rounded-xl p-5 border border-slate-200">
+            <p className="text-sm text-slate-500 mb-1">已玩游戏</p>
+            <p className="text-2xl font-bold text-indigo-500">{gamesPlayed} / {games.length}</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-200">
+            <h3 className="font-semibold text-slate-900">各游戏最高分</h3>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {highScores.map((game) => (
+              <Link
+                key={game.gameId}
+                href={`/game/${game.gameId}`}
+                className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{game.icon}</span>
+                  <span className="font-medium text-slate-800">{game.gameName}</span>
+                </div>
+                <span className="font-semibold text-indigo-500">
+                  {game.highScore.toLocaleString()} 分
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-200">
+            <h3 className="font-semibold text-slate-900">游戏记录</h3>
+          </div>
+          <div className="p-4">
+            <div className="flex gap-2 mb-4">
+              {games.map((gameId) => (
+                <button
+                  key={gameId}
+                  onClick={() => setSelectedGame(gameId)}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+                    selectedGame === gameId
+                      ? 'bg-indigo-500 text-white'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{game.icon}</span>
-                    <span className="font-medium">{game.gameName}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-cyan-400 font-bold">
-                      {game.highScore.toLocaleString()}
-                    </span>
-                    <span className="text-gray-500 text-sm ml-1">分</span>
-                  </div>
-                </Link>
+                  {gameIcons[gameId]} {gameNames[gameId]}
+                </button>
               ))}
             </div>
-          </div>
-        </div>
 
-        <div className="glass-card rounded-2xl overflow-hidden">
-          <div className="flex border-b border-white/10">
-            <button
-              onClick={() => setActiveTab('stats')}
-              className={`flex-1 px-6 py-4 font-medium transition-colors ${
-                activeTab === 'stats'
-                  ? 'bg-pink-500/10 text-pink-400 border-b-2 border-pink-500'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4 inline mr-2" />
-              最高分
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex-1 px-6 py-4 font-medium transition-colors ${
-                activeTab === 'history'
-                  ? 'bg-cyan-500/10 text-cyan-400 border-b-2 border-cyan-500'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Clock className="w-4 h-4 inline mr-2" />
-              游戏记录
-            </button>
-          </div>
-
-          <div className="p-6">
-            {activeTab === 'stats' ? (
-              <div className="space-y-4">
-                {highScores.map((game) => (
-                  <div
-                    key={game.gameId}
-                    className="flex items-center justify-between p-4 rounded-lg bg-white/5"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-cyan-500/20 flex items-center justify-center text-2xl">
-                        {game.icon}
-                      </div>
-                      <div>
-                        <p className="font-bold">{game.gameName}</p>
-                        <p className="text-sm text-gray-400">历史最高</p>
-                      </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {history.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  <p>暂无记录</p>
+                  <Link href={`/game/${selectedGame}`} className="text-indigo-500 hover:text-indigo-600 mt-1 inline-block">
+                    去玩一局 →
+                  </Link>
+                </div>
+              ) : (
+                history.map((record, index) => (
+                  <div key={record.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-slate-400">#{index + 1}</span>
+                      <span className="text-sm text-slate-600">
+                        {new Date(record.timestamp).toLocaleString('zh-CN')}
+                      </span>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-cyan-400">
-                        {game.highScore.toLocaleString()}
-                      </p>
-                    </div>
+                    <span className="font-semibold text-indigo-500">{record.score.toLocaleString()} 分</span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div>
-                <div className="flex gap-2 mb-4">
-                  {games.map((gameId) => (
-                    <button
-                      key={gameId}
-                      onClick={() => setSelectedGame(gameId)}
-                      className={`px-3 py-1 rounded-lg text-sm transition-all ${
-                        selectedGame === gameId
-                          ? 'bg-pink-500/20 text-pink-400'
-                          : 'bg-white/5 text-gray-400 hover:text-white'
-                      }`}
-                    >
-                      {gameIcons[gameId]} {gameNames[gameId]}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {history.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>暂无游戏记录</p>
-                      <Link
-                        href={`/game/${selectedGame}`}
-                        className="text-pink-400 hover:text-pink-300 mt-2 inline-block"
-                      >
-                        去玩一局 →
-                      </Link>
-                    </div>
-                  ) : (
-                    history.map((record, index) => (
-                      <div
-                        key={record.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-white/5"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-gray-500 text-sm">#{index + 1}</span>
-                          <span className="text-gray-400 text-sm">
-                            {new Date(record.timestamp).toLocaleString('zh-CN')}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-cyan-400 font-bold">
-                            {record.score.toLocaleString()} 分
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
