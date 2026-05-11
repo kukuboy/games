@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Play, Pause, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame } from '@/contexts/GameContext';
 
@@ -16,13 +15,13 @@ type Piece = {
 };
 
 const PIECES: Piece[] = [
-  { shape: [[1, 1, 1, 1]], color: '#111' },
-  { shape: [[1, 1], [1, 1]], color: '#333' },
-  { shape: [[0, 1, 0], [1, 1, 1]], color: '#555' },
-  { shape: [[1, 0, 0], [1, 1, 1]], color: '#777' },
-  { shape: [[0, 0, 1], [1, 1, 1]], color: '#999' },
-  { shape: [[1, 1, 0], [0, 1, 1]], color: '#bbb' },
-  { shape: [[0, 1, 1], [1, 1, 0]], color: '#ddd' },
+  { shape: [[1, 1, 1, 1]], color: '#7c9eb2' },
+  { shape: [[1, 1], [1, 1]], color: '#e6a4b4' },
+  { shape: [[0, 1, 0], [1, 1, 1]], color: '#b4a7d6' },
+  { shape: [[1, 0, 0], [1, 1, 1]], color: '#9fc5e8' },
+  { shape: [[0, 0, 1], [1, 1, 1]], color: '#f9cb9c' },
+  { shape: [[1, 1, 0], [0, 1, 1]], color: '#a8d8a8' },
+  { shape: [[0, 1, 1], [1, 1, 0]], color: '#f4a4a4' },
 ];
 
 export default function TetrisGame() {
@@ -90,29 +89,16 @@ export default function TetrisGame() {
   }, []);
 
   const draw = useCallback((ctx: CanvasRenderingContext2D, currentGrid: (string | null)[][], piece: Piece | null, px: number, py: number) => {
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#e8e4e0';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    ctx.strokeStyle = '#eee';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= GRID_WIDTH; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * BLOCK_SIZE, 0);
-      ctx.lineTo(i * BLOCK_SIZE, ctx.canvas.height);
-      ctx.stroke();
-    }
-    for (let i = 0; i <= GRID_HEIGHT; i++) {
-      ctx.beginPath();
-      ctx.moveTo(0, i * BLOCK_SIZE);
-      ctx.lineTo(ctx.canvas.width, i * BLOCK_SIZE);
-      ctx.stroke();
-    }
 
     for (let row = 0; row < GRID_HEIGHT; row++) {
       for (let col = 0; col < GRID_WIDTH; col++) {
         if (currentGrid[row][col]) {
           ctx.fillStyle = currentGrid[row][col]!;
-          ctx.fillRect(col * BLOCK_SIZE + 2, row * BLOCK_SIZE + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
+          ctx.beginPath();
+          ctx.roundRect(col * BLOCK_SIZE + 2, row * BLOCK_SIZE + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4, 4);
+          ctx.fill();
         }
       }
     }
@@ -124,7 +110,9 @@ export default function TetrisGame() {
             const x = (px + col) * BLOCK_SIZE;
             const y = (py + row) * BLOCK_SIZE;
             ctx.fillStyle = piece.color;
-            ctx.fillRect(x + 2, y + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
+            ctx.beginPath();
+            ctx.roundRect(x + 2, y + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4, 4);
+            ctx.fill();
           }
         }
       }
@@ -222,29 +210,35 @@ export default function TetrisGame() {
   }, [gameStatus, currentPiece, currentX, currentY, grid, gameOver, isAuthenticated, score, createNewPiece, checkCollision, mergePiece, clearLines, saveScore, setGameStatus]);
 
   return (
-    <div className="min-h-screen pt-24 px-5">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
-          <h1 className="text-xl">俄罗斯方块</h1>
-          <div className="text-sm">{score}</div>
+    <div className="min-h-screen pb-12">
+      <div className="pt-28 px-6 pb-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="clay-button py-2 px-4 text-sm">← 返回</Link>
+            <h1 className="text-xl font-semibold">俄罗斯方块</h1>
+            <div className="clay-card py-2 px-4">
+              <span className="text-lg font-semibold">{score}</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="flex justify-center mb-6">
+      <div className="px-6">
+        <div className="max-w-2xl mx-auto flex justify-center">
           <div className="relative">
             <canvas
               ref={canvasRef}
               width={GRID_WIDTH * BLOCK_SIZE}
               height={GRID_HEIGHT * BLOCK_SIZE}
-              className="border border-zinc-200"
+              className="rounded-2xl shadow-lg"
             />
             
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
-                <div className="text-center">
-                  <p className="text-sm text-zinc-500 mb-2">游戏结束</p>
-                  <p className="text-2xl font-medium mb-4">{score}</p>
-                  <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="clay-card text-center">
+                  <p className="text-sm opacity-50 mb-2">游戏结束</p>
+                  <p className="text-2xl font-semibold mb-4">{score}</p>
+                  <button onClick={startGame} className="clay-button clay-button-primary">
                     再来一局
                   </button>
                 </div>
@@ -252,27 +246,29 @@ export default function TetrisGame() {
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
-                <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
-                  开始
-                </button>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="clay-card">
+                  <button onClick={startGame} className="clay-button clay-button-primary">
+                    开始游戏
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex justify-center gap-4">
+        <div className="max-w-2xl mx-auto mt-6 flex justify-center gap-4">
           {gameStatus === 'playing' && (
-            <button onClick={() => setGameStatus('paused')} className="text-sm text-zinc-500 hover:text-black">
+            <button onClick={() => setGameStatus('paused')} className="clay-button py-2 px-4 text-sm">
               暂停
             </button>
           )}
           {gameStatus === 'paused' && (
-            <button onClick={() => setGameStatus('playing')} className="text-sm text-zinc-500 hover:text-black">
+            <button onClick={() => setGameStatus('playing')} className="clay-button py-2 px-4 text-sm">
               继续
             </button>
           )}
-          <button onClick={startGame} className="text-sm text-zinc-500 hover:text-black">
+          <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
             重新开始
           </button>
         </div>

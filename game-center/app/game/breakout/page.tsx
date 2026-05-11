@@ -28,7 +28,6 @@ export default function BreakoutGame() {
   const [score, setLocalScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
-  const [lives, setLives] = useState(3);
 
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const ballRef = useRef(ball);
@@ -40,6 +39,7 @@ export default function BreakoutGame() {
   const createBricks = useCallback(() => {
     const brickWidth = (CANVAS_WIDTH - 40) / BRICK_COLS;
     const newBricks: Brick[] = [];
+    const colors = ['#e6a4b4', '#f9cb9c', '#ffe599', '#b4a7d6', '#9fc5e8'];
     const points = [50, 40, 30, 20, 10];
 
     for (let row = 0; row < BRICK_ROWS; row++) {
@@ -58,23 +58,26 @@ export default function BreakoutGame() {
   }, []);
 
   const draw = useCallback((ctx: CanvasRenderingContext2D, currentPaddleX: number, currentBall: Ball, currentBricks: Brick[]) => {
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#e8e4e0';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    ctx.strokeStyle = '#eee';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     currentBricks.forEach(brick => {
       if (!brick.active) return;
-      ctx.fillStyle = '#333';
-      ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+      ctx.fillStyle = '#f5f2ef';
+      ctx.beginPath();
+      ctx.roundRect(brick.x, brick.y, brick.width, brick.height, 4);
+      ctx.fill();
+      ctx.strokeStyle = brick.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
     });
 
-    ctx.fillStyle = '#111';
-    ctx.fillRect(currentPaddleX, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
+    ctx.fillStyle = '#7c9eb2';
+    ctx.beginPath();
+    ctx.roundRect(currentPaddleX, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT, 6);
+    ctx.fill();
 
-    ctx.fillStyle = '#111';
+    ctx.fillStyle = '#e6a4b4';
     ctx.beginPath();
     ctx.arc(currentBall.x, currentBall.y, BALL_RADIUS, 0, Math.PI * 2);
     ctx.fill();
@@ -93,7 +96,6 @@ export default function BreakoutGame() {
     setBall({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 80, dx: 4, dy: -4 });
     setPaddleX(CANVAS_WIDTH / 2 - PADDLE_WIDTH / 2);
     setLocalScore(0);
-    setLives(3);
     setGameOver(false);
     setShowGameOver(false);
     setGameStatus('playing');
@@ -107,7 +109,6 @@ export default function BreakoutGame() {
       let currentPaddle = paddleRef.current;
       let currentScore = score;
       let currentBricks = [...bricks];
-      let currentLives = lives;
 
       currentBall.x += currentBall.dx;
       currentBall.y += currentBall.dy;
@@ -129,18 +130,11 @@ export default function BreakoutGame() {
       }
 
       if (currentBall.y + BALL_RADIUS > CANVAS_HEIGHT) {
-        currentLives--;
-        setLives(currentLives);
-        if (currentLives <= 0) {
-          setGameOver(true);
-          setShowGameOver(true);
-          setGameStatus('gameover');
-          if (isAuthenticated) saveScore(score, 'breakout');
-          return;
-        } else {
-          currentBall = { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 80, dx: 4, dy: -4 };
-          setBall(currentBall);
-        }
+        setGameOver(true);
+        setShowGameOver(true);
+        setGameStatus('gameover');
+        if (isAuthenticated) saveScore(score, 'breakout');
+        return;
       }
 
       for (let i = 0; i < currentBricks.length; i++) {
@@ -174,7 +168,7 @@ export default function BreakoutGame() {
 
     gameLoopRef.current = setTimeout(loop, 16);
     return () => { if (gameLoopRef.current) clearTimeout(gameLoopRef.current); };
-  }, [gameStatus, bricks, score, lives, gameOver, isAuthenticated, saveScore, createBricks, setGameStatus]);
+  }, [gameStatus, bricks, score, gameOver, isAuthenticated, saveScore, createBricks, setGameStatus]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (gameStatus !== 'playing' || gameOver) return;
@@ -197,30 +191,36 @@ export default function BreakoutGame() {
   }, [handleKeyDown]);
 
   return (
-    <div className="min-h-screen pt-24 px-5">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
-          <h1 className="text-xl">打砖块</h1>
-          <div className="text-sm">{score}</div>
+    <div className="min-h-screen pb-12">
+      <div className="pt-28 px-6 pb-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="clay-button py-2 px-4 text-sm">← 返回</Link>
+            <h1 className="text-xl font-semibold">打砖块</h1>
+            <div className="clay-card py-2 px-4">
+              <span className="text-lg font-semibold">{score}</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="flex justify-center mb-6">
+      <div className="px-6">
+        <div className="max-w-2xl mx-auto flex justify-center">
           <div className="relative">
             <canvas
               ref={canvasRef}
               width={CANVAS_WIDTH}
               height={CANVAS_HEIGHT}
               onMouseMove={handleMouseMove}
-              className="border border-zinc-200"
+              className="rounded-2xl shadow-lg cursor-pointer"
             />
             
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
-                <div className="text-center">
-                  <p className="text-sm text-zinc-500 mb-2">游戏结束</p>
-                  <p className="text-2xl font-medium mb-4">{score}</p>
-                  <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="clay-card text-center">
+                  <p className="text-sm opacity-50 mb-2">游戏结束</p>
+                  <p className="text-2xl font-semibold mb-4">{score}</p>
+                  <button onClick={startGame} className="clay-button clay-button-primary">
                     再来一局
                   </button>
                 </div>
@@ -228,27 +228,29 @@ export default function BreakoutGame() {
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
-                <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
-                  开始
-                </button>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="clay-card">
+                  <button onClick={startGame} className="clay-button clay-button-primary">
+                    开始游戏
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex justify-center gap-4">
+        <div className="max-w-2xl mx-auto mt-6 flex justify-center gap-4">
           {gameStatus === 'playing' && (
-            <button onClick={() => setGameStatus('paused')} className="text-sm text-zinc-500 hover:text-black">
+            <button onClick={() => setGameStatus('paused')} className="clay-button py-2 px-4 text-sm">
               暂停
             </button>
           )}
           {gameStatus === 'paused' && (
-            <button onClick={() => setGameStatus('playing')} className="text-sm text-zinc-500 hover:text-black">
+            <button onClick={() => setGameStatus('playing')} className="clay-button py-2 px-4 text-sm">
               继续
             </button>
           )}
-          <button onClick={startGame} className="text-sm text-zinc-500 hover:text-black">
+          <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
             重新开始
           </button>
         </div>

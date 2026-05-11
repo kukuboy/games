@@ -44,28 +44,17 @@ export default function SnakeGame() {
   }, []);
 
   const draw = useCallback((ctx: CanvasRenderingContext2D, currentSnake: Position[], currentFood: Position) => {
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#e8e4e0';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    ctx.strokeStyle = '#eee';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= GRID_SIZE; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * CELL_SIZE, 0);
-      ctx.lineTo(i * CELL_SIZE, ctx.canvas.height);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, i * CELL_SIZE);
-      ctx.lineTo(ctx.canvas.width, i * CELL_SIZE);
-      ctx.stroke();
-    }
-
     currentSnake.forEach((segment, i) => {
-      ctx.fillStyle = i === 0 ? '#111' : '#555';
-      ctx.fillRect(segment.x * CELL_SIZE + 2, segment.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+      ctx.fillStyle = i === 0 ? '#7c9eb2' : '#9fc5e8';
+      ctx.beginPath();
+      ctx.roundRect(segment.x * CELL_SIZE + 2, segment.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4, 4);
+      ctx.fill();
     });
 
-    ctx.fillStyle = '#111';
+    ctx.fillStyle = '#e6a4b4';
     ctx.beginPath();
     ctx.arc(currentFood.x * CELL_SIZE + CELL_SIZE / 2, currentFood.y * CELL_SIZE + CELL_SIZE / 2, CELL_SIZE / 2 - 3, 0, Math.PI * 2);
     ctx.fill();
@@ -141,11 +130,9 @@ export default function SnakeGame() {
 
       let newSnake = [newHead, ...currentSnake];
       let newFood = food;
-      let newScore = score;
 
       if (newHead.x === food.x && newHead.y === food.y) {
-        newScore += 10;
-        setLocalScore(newScore);
+        setLocalScore(prev => prev + 10);
         newFood = generateFood(newSnake);
         setFood(newFood);
       } else {
@@ -165,29 +152,35 @@ export default function SnakeGame() {
   }, [gameStatus, snake, food, score, nextDirection, gameOver, checkCollision, generateFood, isAuthenticated, saveScore, setGameStatus]);
 
   return (
-    <div className="min-h-screen pt-24 px-5">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
-          <h1 className="text-xl">贪吃蛇</h1>
-          <div className="text-sm">{score}</div>
+    <div className="min-h-screen pb-12">
+      <div className="pt-28 px-6 pb-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="clay-button py-2 px-4 text-sm">← 返回</Link>
+            <h1 className="text-xl font-semibold">贪吃蛇</h1>
+            <div className="clay-card py-2 px-4">
+              <span className="text-lg font-semibold">{score}</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="flex justify-center mb-6">
+      <div className="px-6">
+        <div className="max-w-2xl mx-auto flex justify-center">
           <div className="relative">
             <canvas
               ref={canvasRef}
               width={GRID_SIZE * CELL_SIZE}
               height={GRID_SIZE * CELL_SIZE}
-              className="border border-zinc-200"
+              className="rounded-2xl shadow-lg"
             />
             
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
-                <div className="text-center">
-                  <p className="text-sm text-zinc-500 mb-2">游戏结束</p>
-                  <p className="text-2xl font-medium mb-4">{score}</p>
-                  <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="clay-card text-center">
+                  <p className="text-sm opacity-50 mb-2">游戏结束</p>
+                  <p className="text-2xl font-semibold mb-4">{score}</p>
+                  <button onClick={startGame} className="clay-button clay-button-primary">
                     再来一局
                   </button>
                 </div>
@@ -195,27 +188,29 @@ export default function SnakeGame() {
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
-                <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
-                  开始
-                </button>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="clay-card">
+                  <button onClick={startGame} className="clay-button clay-button-primary">
+                    开始游戏
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex justify-center gap-4">
+        <div className="max-w-2xl mx-auto mt-6 flex justify-center gap-4">
           {gameStatus === 'playing' && (
-            <button onClick={() => setGameStatus('paused')} className="text-sm text-zinc-500 hover:text-black">
+            <button onClick={() => setGameStatus('paused')} className="clay-button py-2 px-4 text-sm">
               暂停
             </button>
           )}
           {gameStatus === 'paused' && (
-            <button onClick={() => setGameStatus('playing')} className="text-sm text-zinc-500 hover:text-black">
+            <button onClick={() => setGameStatus('playing')} className="clay-button py-2 px-4 text-sm">
               继续
             </button>
           )}
-          <button onClick={startGame} className="text-sm text-zinc-500 hover:text-black">
+          <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
             重新开始
           </button>
         </div>

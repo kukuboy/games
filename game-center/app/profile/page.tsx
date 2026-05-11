@@ -14,6 +14,12 @@ const gameNames: Record<GameType, string> = {
   breakout: '打砖块',
   memory: '记忆翻牌',
 };
+const gameIcons: Record<GameType, string> = {
+  tetris: '🧱',
+  snake: '🐍',
+  breakout: '🎯',
+  memory: '🃏',
+};
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -35,63 +41,103 @@ export default function ProfilePage() {
 
   if (loading || !isAuthenticated || !user) return null;
 
-  return (
-    <div className="min-h-screen pt-24 px-5">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl">{user.nickname}</h1>
-          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
-        </div>
+  const highScores = games.map(gameId => ({
+    gameId,
+    gameName: gameNames[gameId],
+    icon: gameIcons[gameId],
+    highScore: getUserHighScores(user.id, gameId),
+  }));
 
-        <div className="space-y-6">
-          <div className="border-t border-zinc-100 pt-6">
-            <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-4">最高分</h2>
-            <div className="space-y-0">
-              {games.map((game) => {
-                const high = getUserHighScores(user.id, game);
-                return (
-                  <Link
-                    key={game}
-                    href={`/game/${game}`}
-                    className="flex items-center justify-between py-3 border-t border-zinc-100 -mx-5 px-5 hover:bg-zinc-50"
-                  >
-                    <span className="text-sm">{gameNames[game]}</span>
-                    <span className="text-sm font-medium">{high}</span>
-                  </Link>
-                );
-              })}
+  const totalScore = highScores.reduce((sum, g) => sum + g.highScore, 0);
+
+  return (
+    <div className="min-h-screen pb-12">
+      <div className="pt-28 px-6 pb-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="clay-button py-2 px-4 text-sm">← 返回</Link>
+            <h1 className="text-xl font-semibold">{user.nickname}</h1>
+            <div className="w-16"></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="clay-card">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center py-4 rounded-xl bg-[var(--bg)]">
+                <p className="text-2xl font-semibold">{totalScore.toLocaleString()}</p>
+                <p className="text-sm opacity-50">总最高分</p>
+              </div>
+              <div className="text-center py-4 rounded-xl bg-[var(--bg)]">
+                <p className="text-2xl font-semibold">{highScores.filter(g => g.highScore > 0).length}</p>
+                <p className="text-sm opacity-50">已玩游戏</p>
+              </div>
             </div>
           </div>
 
-          <div className="border-t border-zinc-100 pt-6">
-            <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-4">历史记录</h2>
+          <div>
+            <div className="clay-badge mb-4">
+              <span className="text-sm font-medium opacity-70">各游戏最高分</span>
+            </div>
+            <div className="clay-card">
+              <div className="space-y-2">
+                {highScores.map((game) => (
+                  <Link
+                    key={game.gameId}
+                    href={`/game/${game.gameId}`}
+                    className="flex items-center justify-between py-3 px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--shadow-dark)] transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{game.icon}</span>
+                      <span className="font-medium">{game.gameName}</span>
+                    </div>
+                    <span className="font-semibold">{game.highScore > 0 ? game.highScore.toLocaleString() : '-'}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="clay-badge mb-4">
+              <span className="text-sm font-medium opacity-70">游戏记录</span>
+            </div>
             
-            <div className="flex gap-4 mb-6 overflow-x-auto">
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
               {games.map((game) => (
                 <button
                   key={game}
                   onClick={() => setSelectedGame(game)}
-                  className={`text-xs shrink-0 ${
-                    selectedGame === game ? 'text-black border-b border-black pb-1' : 'text-zinc-500 hover:text-black'
+                  className={`clay-button py-2 px-4 text-sm whitespace-nowrap ${
+                    selectedGame === game ? 'clay-button-primary' : ''
                   }`}
                 >
-                  {gameNames[game]}
+                  {gameIcons[game]} {gameNames[game]}
                 </button>
               ))}
             </div>
 
-            <div className="space-y-0">
+            <div className="clay-card">
               {history.length === 0 ? (
-                <p className="text-sm text-zinc-500">还没有记录</p>
+                <div className="py-8 text-center">
+                  <p className="opacity-50">还没有记录</p>
+                  <Link href={`/game/${selectedGame}`} className="text-sm opacity-50 hover:opacity-80 mt-1 inline-block">
+                    去玩一局 →
+                  </Link>
+                </div>
               ) : (
-                history.map((score, i) => (
-                  <div key={score.id} className="flex items-center justify-between py-3 border-t border-zinc-100">
-                    <span className="text-xs text-zinc-500">
-                      {new Date(score.timestamp).toLocaleDateString()}
-                    </span>
-                    <span className="text-sm font-medium">{score.score}</span>
-                  </div>
-                ))
+                <div className="space-y-2">
+                  {history.map((score) => (
+                    <div key={score.id} className="flex items-center justify-between py-3 px-4 rounded-xl bg-[var(--bg)]">
+                      <span className="text-sm opacity-50">
+                        {new Date(score.timestamp).toLocaleDateString()}
+                      </span>
+                      <span className="font-semibold">{score.score.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>

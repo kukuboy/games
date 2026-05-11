@@ -112,55 +112,65 @@ export default function MemoryGame() {
   };
 
   return (
-    <div className="min-h-screen pt-24 px-5">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
-          <h1 className="text-xl">记忆翻牌</h1>
-          <div className="text-sm">{moves}</div>
+    <div className="min-h-screen pb-12">
+      <div className="pt-28 px-6 pb-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="clay-button py-2 px-4 text-sm">← 返回</Link>
+            <h1 className="text-xl font-semibold">记忆翻牌</h1>
+            <div className="clay-card py-2 px-4">
+              <span className="text-lg font-semibold">{moves}</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-4 gap-3 mb-6 max-w-md mx-auto">
-          {cards.map(card => (
-            <button
-              key={card.id}
-              onClick={() => handleCardClick(card.id)}
-              className={`aspect-square text-xl border transition-all ${
-                card.isFlipped || card.isMatched
-                  ? 'bg-white border-black'
-                  : 'bg-zinc-100 border-zinc-200 hover:bg-zinc-200'
-              }`}
-            >
-              {(card.isFlipped || card.isMatched) ? card.symbol : ''}
-            </button>
-          ))}
+      <div className="px-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-4 gap-4 mb-6 max-w-md mx-auto">
+            {cards.map(card => (
+              <button
+                key={card.id}
+                onClick={() => handleCardClick(card.id)}
+                className={`aspect-square rounded-2xl text-2xl transition-all ${
+                  card.isFlipped || card.isMatched
+                    ? 'clay-card'
+                    : 'clay-button'
+                } ${card.isMatched ? 'opacity-60' : ''}`}
+              >
+                {(card.isFlipped || card.isMatched) ? card.symbol : '?'}
+              </button>
+            ))}
+          </div>
+
+          {isGameWon && (
+            <div className="max-w-2xl mx-auto">
+              <div className="clay-card text-center">
+                <p className="text-sm opacity-50 mb-2">完成！</p>
+                <p className="text-2xl font-semibold mb-4">{moves} 步</p>
+                <button onClick={startGame} className="clay-button clay-button-primary">
+                  再玩一局
+                </button>
+              </div>
+            </div>
+          )}
+
+          {gameStatus === 'idle' && !isGameWon && (
+            <div className="max-w-2xl mx-auto text-center">
+              <button onClick={startGame} className="clay-button clay-button-primary">
+                开始游戏
+              </button>
+            </div>
+          )}
+
+          {gameStatus === 'playing' && !isGameWon && (
+            <div className="max-w-2xl mx-auto mt-6 flex justify-center">
+              <button onClick={startGame} className="clay-button py-2 px-4 text-sm">
+                重新开始
+              </button>
+            </div>
+          )}
         </div>
-
-        {isGameWon && (
-          <div className="text-center mb-6">
-            <p className="text-sm text-zinc-500 mb-2">完成！</p>
-            <p className="text-2xl font-medium mb-4">{moves} 步</p>
-            <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
-              再玩一局
-            </button>
-          </div>
-        )}
-
-        {gameStatus === 'idle' && !isGameWon && (
-          <div className="text-center mb-6">
-            <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
-              开始
-            </button>
-          </div>
-        )}
-
-        {gameStatus === 'playing' && !isGameWon && (
-          <div className="flex justify-center gap-4">
-            <button onClick={startGame} className="text-sm text-zinc-500 hover:text-black">
-              重新开始
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

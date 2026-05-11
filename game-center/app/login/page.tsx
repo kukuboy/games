@@ -40,64 +40,76 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen pt-24 px-5">
-      <div className="max-w-xs mx-auto">
-        <h1 className="text-xl mb-8">登录</h1>
+    <div className="min-h-screen flex items-center justify-center px-4 pb-8">
+      <div className="w-full max-w-sm pt-24">
+        <div className="clay-card mb-6">
+          <h1 className="text-2xl font-semibold text-center mb-2">登录</h1>
+          <p className="text-center text-sm opacity-50">欢迎回到游戏中心</p>
+        </div>
 
-        {error && (
-          <p className="text-sm text-red-500 mb-4">{error}</p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">邮箱</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@example.com"
-              required
-              className="w-full px-0 py-2 border-0 border-b border-zinc-200 focus:outline-none focus:border-black text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">密码</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-0 py-2 border-0 border-b border-zinc-200 focus:outline-none focus:border-black text-sm pr-8"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+        <div className="clay-card">
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-rose-100 text-rose-600 text-sm text-center">
+              {error}
             </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium mb-2 opacity-70">邮箱</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="请输入邮箱"
+                required
+                className="clay-input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 opacity-70">密码</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="请输入密码"
+                  required
+                  className="clay-input pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-80"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="clay-button clay-button-primary w-full"
+            >
+              {loading ? '登录中...' : '登录'}
+            </button>
+          </form>
+
+          <div className="mt-5 text-center">
+            <p className="text-sm opacity-60">
+              还没有账号？{' '}
+              <Link href="/register" className="font-medium opacity-80 hover:opacity-100">
+                立即注册
+              </Link>
+            </p>
           </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 text-sm font-medium bg-black text-white hover:bg-zinc-800 disabled:opacity-50"
-          >
-            {loading ? '登录中...' : '登录'}
-          </button>
-        </form>
-
-        <p className="text-xs text-zinc-500 mt-6">
-          还没有账号？ <Link href="/register" className="text-black">注册</Link>
-        </p>
-
-        <p className="text-xs text-zinc-400 mt-4">
-          测试：player1@game.com / demo123
-        </p>
+        <div className="clay-card mt-4">
+          <p className="text-xs text-center opacity-50">测试账号：player1@game.com / demo123</p>
+        </div>
       </div>
     </div>
   );
