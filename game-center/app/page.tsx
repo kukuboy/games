@@ -9,7 +9,8 @@ import { ChevronRight } from 'lucide-react';
 const games: GameInfo[] = [
   { id: 'tetris', title: '俄罗斯方块', description: '经典方块消除', icon: '🧱', path: '/game/tetris', color: 'from-rose-300 to-pink-300' },
   { id: 'snake', title: '贪吃蛇', description: '控制蛇吃食物', icon: '🐍', path: '/game/snake', color: 'from-emerald-300 to-teal-300' },
-  { id: 'breakout', title: '打砖块', description: '反弹球击碎砖块', icon: '🎯', path: '/game/breakout', color: 'from-blue-300 to-cyan-300' },
+  { id: 'sudoku', title: '数独', description: '逻辑推理填数', icon: '🔢', path: '/game/sudoku', color: 'from-blue-300 to-cyan-300' },
+  { id: 'breakout', title: '打砖块', description: '反弹球击碎砖块', icon: '🎯', path: '/game/breakout', color: 'from-blue-300 to-indigo-300' },
   { id: 'memory', title: '记忆翻牌', description: '翻转卡牌配对', icon: '🃏', path: '/game/memory', color: 'from-violet-300 to-purple-300' },
 ];
 

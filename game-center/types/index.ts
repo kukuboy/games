@@ -1,4 +1,4 @@
-export type GameType = 'tetris' | 'snake' | 'breakout' | 'memory';
+export type GameType = 'tetris' | 'snake' | 'sudoku' | 'breakout' | 'memory';
 
 export interface User {
   id: string;

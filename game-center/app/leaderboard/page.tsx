@@ -8,6 +8,7 @@ import { GameType, LeaderboardEntry } from '@/types';
 const gameTabs: { id: GameType; name: string; icon: string }[] = [
   { id: 'tetris', name: '俄罗斯方块', icon: '🧱' },
   { id: 'snake', name: '贪吃蛇', icon: '🐍' },
+  { id: 'sudoku', name: '数独', icon: '🔢' },
   { id: 'breakout', name: '打砖块', icon: '🎯' },
   { id: 'memory', name: '记忆翻牌', icon: '🃏' },
 ];

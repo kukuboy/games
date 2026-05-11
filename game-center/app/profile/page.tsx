@@ -7,16 +7,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getUserScoreHistory, getUserHighScores } from '@/lib/storage';
 import { GameType, GameScore } from '@/types';
 
-const games: GameType[] = ['tetris', 'snake', 'breakout', 'memory'];
+const games: GameType[] = ['tetris', 'snake', 'sudoku', 'breakout', 'memory'];
 const gameNames: Record<GameType, string> = {
   tetris: '俄罗斯方块',
   snake: '贪吃蛇',
+  sudoku: '数独',
   breakout: '打砖块',
   memory: '记忆翻牌',
 };
 const gameIcons: Record<GameType, string> = {
   tetris: '🧱',
   snake: '🐍',
+  sudoku: '🔢',
   breakout: '🎯',
   memory: '🃏',
 };
