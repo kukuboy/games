@@ -16,14 +16,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className="min-h-screen flex flex-col bg-slate-50">
+      <body className="min-h-screen flex flex-col">
         <AuthProvider>
           <GameProvider>
             <Navbar />
-            <main className="flex-1 pt-16">
+            <main className="flex-1">
               {children}
             </main>
-            <footer className="py-6 text-center text-sm text-slate-400 border-t border-slate-200">
+            <footer className="py-10 text-center text-base text-gray-400 border-t border-gray-200">
               <p>© 2024 游戏中心</p>
             </footer>
           </GameProvider>

@@ -43,8 +43,8 @@ export default function ProfilePage() {
 
   if (loading || !isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-10 h-10 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -61,56 +61,56 @@ export default function ProfilePage() {
   const gamesPlayed = games.filter(g => getUserHighScores(user.id, g) > 0).length;
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-slate-50">
+    <div className="min-h-screen py-16 px-6 bg-gray-50">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/" className="p-2 rounded-lg bg-white hover:bg-slate-100 transition-colors border border-slate-200">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+        <div className="flex items-center gap-5 mb-10">
+          <Link href="/" className="p-3 rounded-xl bg-white hover:bg-gray-100 transition-colors border border-gray-200">
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
           </Link>
-          <h1 className="text-2xl font-semibold text-slate-900">个人中心</h1>
+          <h1 className="text-3xl font-semibold text-gray-900">个人中心</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-5 border border-slate-200">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                <User className="w-5 h-5 text-indigo-500" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="glass-card">
+            <div className="flex items-center gap-5 mb-5">
+              <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+                <User className="w-7 h-7 text-blue-500" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">用户名</p>
-                <p className="font-semibold text-slate-900">{user.nickname}</p>
+                <p className="text-base text-gray-500">用户名</p>
+                <p className="font-semibold text-xl text-gray-900">{user.nickname}</p>
               </div>
             </div>
-            <p className="text-sm text-slate-400">{user.email}</p>
+            <p className="text-base text-gray-400">{user.email}</p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border border-slate-200">
-            <p className="text-sm text-slate-500 mb-1">总最高分</p>
-            <p className="text-2xl font-bold text-indigo-500">{totalHighScores.toLocaleString()}</p>
+          <div className="glass-card">
+            <p className="text-base text-gray-500 mb-3">总最高分</p>
+            <p className="text-3xl font-bold text-blue-500">{totalHighScores.toLocaleString()}</p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border border-slate-200">
-            <p className="text-sm text-slate-500 mb-1">已玩游戏</p>
-            <p className="text-2xl font-bold text-indigo-500">{gamesPlayed} / {games.length}</p>
+          <div className="glass-card">
+            <p className="text-base text-gray-500 mb-3">已玩游戏</p>
+            <p className="text-3xl font-bold text-gray-900">{gamesPlayed} / {games.length}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200">
-            <h3 className="font-semibold text-slate-900">各游戏最高分</h3>
+        <div className="glass-card mb-8">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <h3 className="font-semibold text-xl text-gray-900">各游戏最高分</h3>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-gray-100">
             {highScores.map((game) => (
               <Link
                 key={game.gameId}
                 href={`/game/${game.gameId}`}
-                className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-colors"
+                className="flex items-center justify-between px-6 py-5 hover:bg-gray-50 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{game.icon}</span>
-                  <span className="font-medium text-slate-800">{game.gameName}</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl">{game.icon}</span>
+                  <span className="font-medium text-lg text-gray-800">{game.gameName}</span>
                 </div>
-                <span className="font-semibold text-indigo-500">
+                <span className="font-semibold text-xl text-blue-500">
                   {game.highScore.toLocaleString()} 分
                 </span>
               </Link>
@@ -118,20 +118,20 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="mt-6 bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200">
-            <h3 className="font-semibold text-slate-900">游戏记录</h3>
+        <div className="glass-card">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <h3 className="font-semibold text-xl text-gray-900">游戏记录</h3>
           </div>
-          <div className="p-4">
-            <div className="flex gap-2 mb-4">
+          <div className="p-6">
+            <div className="flex gap-3 mb-6">
               {games.map((gameId) => (
                 <button
                   key={gameId}
                   onClick={() => setSelectedGame(gameId)}
-                  className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+                  className={`px-4 py-2.5 rounded-xl text-base transition-all ${
                     selectedGame === gameId
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
                   {gameIcons[gameId]} {gameNames[gameId]}
@@ -139,24 +139,24 @@ export default function ProfilePage() {
               ))}
             </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div className="space-y-3 max-h-72 overflow-y-auto">
               {history.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
-                  <p>暂无记录</p>
-                  <Link href={`/game/${selectedGame}`} className="text-indigo-500 hover:text-indigo-600 mt-1 inline-block">
+                <div className="text-center py-12 text-gray-400">
+                  <p className="text-lg">暂无记录</p>
+                  <Link href={`/game/${selectedGame}`} className="text-blue-500 hover:text-blue-600 mt-2 inline-block text-base">
                     去玩一局 →
                   </Link>
                 </div>
               ) : (
                 history.map((record, index) => (
-                  <div key={record.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-slate-400">#{index + 1}</span>
-                      <span className="text-sm text-slate-600">
+                  <div key={record.id} className="flex items-center justify-between py-4 px-5 rounded-xl bg-gray-50">
+                    <div className="flex items-center gap-4">
+                      <span className="text-base text-gray-400">#{index + 1}</span>
+                      <span className="text-base text-gray-600">
                         {new Date(record.timestamp).toLocaleString('zh-CN')}
                       </span>
                     </div>
-                    <span className="font-semibold text-indigo-500">{record.score.toLocaleString()} 分</span>
+                    <span className="font-semibold text-xl text-blue-500">{record.score.toLocaleString()} 分</span>
                   </div>
                 ))
               )}
