@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Play, Pause, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGame } from '@/contexts/GameContext';
 
@@ -15,7 +14,7 @@ const BRICK_ROWS = 5;
 const BRICK_COLS = 8;
 const BRICK_HEIGHT = 20;
 
-type Brick = { x: number; y: number; width: number; height: number; color: string; points: number; active: boolean };
+type Brick = { x: number; y: number; width: number; height: number; points: number; active: boolean };
 type Ball = { x: number; y: number; dx: number; dy: number };
 
 export default function BreakoutGame() {
@@ -41,7 +40,6 @@ export default function BreakoutGame() {
   const createBricks = useCallback(() => {
     const brickWidth = (CANVAS_WIDTH - 40) / BRICK_COLS;
     const newBricks: Brick[] = [];
-    const colors = ['#ef4444', '#f97316', '#fbbf24', '#22c55e', '#3b82f6'];
     const points = [50, 40, 30, 20, 10];
 
     for (let row = 0; row < BRICK_ROWS; row++) {
@@ -51,7 +49,6 @@ export default function BreakoutGame() {
           y: 50 + row * (BRICK_HEIGHT + 4),
           width: brickWidth,
           height: BRICK_HEIGHT,
-          color: colors[row],
           points: points[row],
           active: true,
         });
@@ -61,23 +58,23 @@ export default function BreakoutGame() {
   }, []);
 
   const draw = useCallback((ctx: CanvasRenderingContext2D, currentPaddleX: number, currentBall: Ball, currentBricks: Brick[]) => {
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    ctx.strokeStyle = '#eee';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     currentBricks.forEach(brick => {
       if (!brick.active) return;
-      ctx.fillStyle = brick.color;
-      ctx.beginPath();
-      ctx.roundRect(brick.x, brick.y, brick.width, brick.height, 4);
-      ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
     });
 
-    ctx.fillStyle = '#6366f1';
-    ctx.beginPath();
-    ctx.roundRect(currentPaddleX, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT, 6);
-    ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.fillRect(currentPaddleX, CANVAS_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
 
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#111';
     ctx.beginPath();
     ctx.arc(currentBall.x, currentBall.y, BALL_RADIUS, 0, Math.PI * 2);
     ctx.fill();
@@ -200,80 +197,60 @@ export default function BreakoutGame() {
   }, [handleKeyDown]);
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-slate-100">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Link href="/" className="p-2 rounded-lg bg-white hover:bg-slate-200 transition-colors border border-slate-200">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
-          </Link>
-          <h1 className="text-2xl font-semibold text-slate-900">打砖块</h1>
+    <div className="min-h-screen pt-24 px-5">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
+          <h1 className="text-xl">打砖块</h1>
+          <div className="text-sm">{score}</div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
+        <div className="flex justify-center mb-6">
           <div className="relative">
             <canvas
               ref={canvasRef}
               width={CANVAS_WIDTH}
               height={CANVAS_HEIGHT}
               onMouseMove={handleMouseMove}
-              className="rounded-lg border-2 border-slate-300 shadow-lg bg-slate-800 cursor-pointer"
+              className="border border-zinc-200"
             />
-
+            
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 rounded-lg">
-                <div className="text-center p-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">游戏结束</h2>
-                  <p className="text-xl text-indigo-400 mb-2">得分: {score}</p>
-                  <p className="text-sm text-slate-400 mb-4">剩余生命: {lives}</p>
-                  <button onClick={startGame} className="px-5 py-2 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition-colors flex items-center gap-2 mx-auto">
-                    <RotateCcw className="w-4 h-4" /> 再来一局
+              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
+                <div className="text-center">
+                  <p className="text-sm text-zinc-500 mb-2">游戏结束</p>
+                  <p className="text-2xl font-medium mb-4">{score}</p>
+                  <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
+                    再来一局
                   </button>
                 </div>
               </div>
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 rounded-lg">
-                <button onClick={startGame} className="px-6 py-3 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition-colors flex items-center gap-2">
-                  <Play className="w-5 h-5" /> 开始游戏
+              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
+                <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
+                  开始
                 </button>
               </div>
             )}
           </div>
+        </div>
 
-          <div className="flex flex-col gap-3 w-full max-w-[200px]">
-            <div className="bg-white rounded-xl p-4 border border-slate-200">
-              <p className="text-xs text-slate-500 mb-1">当前分数</p>
-              <p className="text-2xl font-bold text-indigo-500">{score}</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-slate-200">
-              <p className="text-xs text-slate-500 mb-1">剩余生命</p>
-              <p className="text-2xl font-bold text-slate-700">{'❤️'.repeat(lives)}</p>
-            </div>
-
-            <div className="flex gap-2">
-              {gameStatus === 'playing' && (
-                <button onClick={() => setGameStatus('paused')} className="flex-1 py-2 rounded-lg bg-amber-100 text-amber-600 border border-amber-200 hover:bg-amber-200 transition-colors">
-                  <Pause className="w-4 h-4 mx-auto" />
-                </button>
-              )}
-              {gameStatus === 'paused' && (
-                <button onClick={() => setGameStatus('playing')} className="flex-1 py-2 rounded-lg bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 transition-colors">
-                  <Play className="w-4 h-4 mx-auto" />
-                </button>
-              )}
-              <button onClick={startGame} className="flex-1 py-2 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors">
-                <RotateCcw className="w-4 h-4 mx-auto" />
-              </button>
-            </div>
-
-            {!isAuthenticated && (
-              <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-100 text-sm text-center">
-                <p className="text-indigo-500">登录后可保存分数</p>
-                <Link href="/login" className="text-indigo-400 hover:text-indigo-600">去登录 →</Link>
-              </div>
-            )}
-          </div>
+        <div className="flex justify-center gap-4">
+          {gameStatus === 'playing' && (
+            <button onClick={() => setGameStatus('paused')} className="text-sm text-zinc-500 hover:text-black">
+              暂停
+            </button>
+          )}
+          {gameStatus === 'paused' && (
+            <button onClick={() => setGameStatus('playing')} className="text-sm text-zinc-500 hover:text-black">
+              继续
+            </button>
+          )}
+          <button onClick={startGame} className="text-sm text-zinc-500 hover:text-black">
+            重新开始
+          </button>
         </div>
       </div>
     </div>

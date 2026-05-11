@@ -1,16 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { getLeaderboard } from '@/lib/storage';
 import { GameType, LeaderboardEntry } from '@/types';
-import { Trophy, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 
-const gameTabs: { id: GameType; name: string; icon: string }[] = [
-  { id: 'tetris', name: '俄罗斯方块', icon: '🧱' },
-  { id: 'snake', name: '贪吃蛇', icon: '🐍' },
-  { id: 'breakout', name: '打砖块', icon: '🎯' },
-  { id: 'memory', name: '记忆翻牌', icon: '🃏' },
+const gameTabs: { id: GameType; name: string }[] = [
+  { id: 'tetris', name: '俄罗斯方块' },
+  { id: 'snake', name: '贪吃蛇' },
+  { id: 'breakout', name: '打砖块' },
+  { id: 'memory', name: '记忆翻牌' },
 ];
 
 export default function LeaderboardPage() {
@@ -18,64 +17,48 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
-    const data = getLeaderboard(selectedGame);
-    setLeaderboard(data.entries);
+    setLeaderboard(getLeaderboard(selectedGame).entries);
   }, [selectedGame]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-6">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </Link>
-            <h1 className="text-xl font-semibold text-gray-900">排行榜</h1>
-          </div>
+    <div className="min-h-screen pt-24 px-5">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl">排行榜</h1>
+          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-6">
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex gap-4 mb-8 overflow-x-auto">
           {gameTabs.map((game) => (
             <button
               key={game.id}
               onClick={() => setSelectedGame(game.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                selectedGame === game.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              className={`text-sm shrink-0 ${
+                selectedGame === game.id ? 'text-black border-b border-black pb-1' : 'text-zinc-500 hover:text-black'
               }`}
             >
-              {game.icon} {game.name}
+              {game.name}
             </button>
           ))}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {leaderboard.length === 0 ? (
-            <div className="py-16 text-center">
-              <Trophy className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-500">暂无记录</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {leaderboard.map((entry) => (
-                <div key={`${entry.nickname}-${entry.timestamp}`} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-gray-100">
-                    {entry.rank <= 3 ? ['🥇', '🥈', '🥉'][entry.rank - 1] : entry.rank}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{entry.nickname}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-blue-500">{entry.score.toLocaleString()}</p>
-                  </div>
+        {leaderboard.length === 0 ? (
+          <p className="text-sm text-zinc-500">还没有记录</p>
+        ) : (
+          <div className="space-y-0">
+            {leaderboard.map((entry, i) => (
+              <div key={`${entry.nickname}-${entry.timestamp}`} className="flex items-center justify-between py-3 border-t border-zinc-100">
+                <div className="flex items-center gap-4">
+                  <span className={`text-xs ${i < 3 ? 'font-medium' : 'text-zinc-400'}`}>
+                    {i + 1}
+                  </span>
+                  <span className="text-sm">{entry.nickname}</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <span className="text-sm font-medium">{entry.score}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

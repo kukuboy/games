@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -27,22 +27,19 @@ export default function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('两次输入的密码不一致');
+      setError('两次密码不一致');
       return;
     }
-
     if (password.length < 6) {
-      setError('密码至少需要6个字符');
+      setError('密码至少6位');
       return;
     }
-
     if (nickname.length < 2) {
-      setError('昵称至少需要2个字符');
+      setError('昵称至少2位');
       return;
     }
 
     setLoading(true);
-
     try {
       const result = await register(email, password, nickname);
       if (result.success) {
@@ -51,112 +48,93 @@ export default function RegisterPage() {
         setError(result.message);
       }
     } catch {
-      setError('注册时出现错误，请重试');
+      setError('注册时出错');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-semibold text-gray-900 mb-4">创建账号</h1>
-          <p className="text-xl text-gray-500">开始游戏之旅</p>
-        </div>
+    <div className="min-h-screen pt-24 px-5">
+      <div className="max-w-xs mx-auto">
+        <h1 className="text-xl mb-8">注册</h1>
 
-        <form onSubmit={handleSubmit} className="glass-card">
-          {error && (
-            <div className="mb-8 p-5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-lg">
-              {error}
-            </div>
-          )}
+        {error && (
+          <p className="text-sm text-red-500 mb-4">{error}</p>
+        )}
 
-          <div className="space-y-7">
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">昵称</label>
-              <input
-                type="text"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="给自己起个名字"
-                required
-                minLength={2}
-                className="input-field"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">昵称</label>
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="你的昵称"
+              required
+              minLength={2}
+              className="w-full px-0 py-2 border-0 border-b border-zinc-200 focus:outline-none focus:border-black text-sm"
+            />
+          </div>
 
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">邮箱</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="请输入邮箱"
-                required
-                className="input-field"
-              />
-            </div>
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">邮箱</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="email@example.com"
+              required
+              className="w-full px-0 py-2 border-0 border-b border-zinc-200 focus:outline-none focus:border-black text-sm"
+            />
+          </div>
 
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">密码</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="至少6个字符"
-                  required
-                  minLength={6}
-                  className="input-field pr-16"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-4">确认密码</label>
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">密码</label>
+            <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="再次输入密码"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="至少6位"
                 required
-                className="input-field"
+                minLength={6}
+                className="w-full px-0 py-2 border-0 border-b border-zinc-200 focus:outline-none focus:border-black text-sm pr-8"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-3 text-lg"
-            >
-              {loading ? (
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <UserPlus className="w-6 h-6" />
-                  <span>注册</span>
-                </>
-              )}
-            </button>
           </div>
 
-          <div className="mt-10 text-center">
-            <p className="text-lg text-gray-500">
-              已有账号？{' '}
-              <Link href="/login" className="text-blue-500 hover:text-blue-600 font-medium">
-                立即登录
-              </Link>
-            </p>
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">确认密码</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="再次输入"
+              required
+              className="w-full px-0 py-2 border-0 border-b border-zinc-200 focus:outline-none focus:border-black text-sm"
+            />
           </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 text-sm font-medium bg-black text-white hover:bg-zinc-800 disabled:opacity-50"
+          >
+            {loading ? '注册中...' : '注册'}
+          </button>
         </form>
+
+        <p className="text-xs text-zinc-500 mt-6">
+          已有账号？ <Link href="/login" className="text-black">登录</Link>
+        </p>
       </div>
     </div>
   );

@@ -16,13 +16,13 @@ type Piece = {
 };
 
 const PIECES: Piece[] = [
-  { shape: [[1, 1, 1, 1]], color: '#6366f1' },
-  { shape: [[1, 1], [1, 1]], color: '#fbbf24' },
-  { shape: [[0, 1, 0], [1, 1, 1]], color: '#8b5cf6' },
-  { shape: [[1, 0, 0], [1, 1, 1]], color: '#3b82f6' },
-  { shape: [[0, 0, 1], [1, 1, 1]], color: '#f97316' },
-  { shape: [[1, 1, 0], [0, 1, 1]], color: '#10b981' },
-  { shape: [[0, 1, 1], [1, 1, 0]], color: '#ef4444' },
+  { shape: [[1, 1, 1, 1]], color: '#111' },
+  { shape: [[1, 1], [1, 1]], color: '#333' },
+  { shape: [[0, 1, 0], [1, 1, 1]], color: '#555' },
+  { shape: [[1, 0, 0], [1, 1, 1]], color: '#777' },
+  { shape: [[0, 0, 1], [1, 1, 1]], color: '#999' },
+  { shape: [[1, 1, 0], [0, 1, 1]], color: '#bbb' },
+  { shape: [[0, 1, 1], [1, 1, 0]], color: '#ddd' },
 ];
 
 export default function TetrisGame() {
@@ -36,21 +36,14 @@ export default function TetrisGame() {
   const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
   const [currentX, setCurrentX] = useState(0);
   const [currentY, setCurrentY] = useState(0);
-  const [nextPiece, setNextPiece] = useState<Piece | null>(null);
   const [score, setLocalScore] = useState(0);
-  const [lines, setLines] = useState(0);
-  const [level, setLevel] = useState(1);
   const [gameOver, setGameOver] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
 
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const lastDropRef = useRef(0);
 
-  const createNewPiece = useCallback(() => {
-    const randomPiece = PIECES[Math.floor(Math.random() * PIECES.length)];
-    const randomNext = PIECES[Math.floor(Math.random() * PIECES.length)];
-    return { piece: randomPiece, next: randomNext };
-  }, []);
+  const createNewPiece = useCallback(() => PIECES[Math.floor(Math.random() * PIECES.length)], []);
 
   const checkCollision = useCallback((piece: Piece, x: number, y: number, currentGrid: (string | null)[][]) => {
     for (let row = 0; row < piece.shape.length; row++) {
@@ -97,14 +90,29 @@ export default function TetrisGame() {
   }, []);
 
   const draw = useCallback((ctx: CanvasRenderingContext2D, currentGrid: (string | null)[][], piece: Piece | null, px: number, py: number) => {
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    ctx.strokeStyle = '#eee';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= GRID_WIDTH; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * BLOCK_SIZE, 0);
+      ctx.lineTo(i * BLOCK_SIZE, ctx.canvas.height);
+      ctx.stroke();
+    }
+    for (let i = 0; i <= GRID_HEIGHT; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, i * BLOCK_SIZE);
+      ctx.lineTo(ctx.canvas.width, i * BLOCK_SIZE);
+      ctx.stroke();
+    }
 
     for (let row = 0; row < GRID_HEIGHT; row++) {
       for (let col = 0; col < GRID_WIDTH; col++) {
         if (currentGrid[row][col]) {
           ctx.fillStyle = currentGrid[row][col]!;
-          ctx.fillRect(col * BLOCK_SIZE + 1, row * BLOCK_SIZE + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+          ctx.fillRect(col * BLOCK_SIZE + 2, row * BLOCK_SIZE + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
         }
       }
     }
@@ -116,7 +124,7 @@ export default function TetrisGame() {
             const x = (px + col) * BLOCK_SIZE;
             const y = (py + row) * BLOCK_SIZE;
             ctx.fillStyle = piece.color;
-            ctx.fillRect(x + 1, y + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+            ctx.fillRect(x + 2, y + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
           }
         }
       }
@@ -160,15 +168,12 @@ export default function TetrisGame() {
   }, [grid, currentPiece, currentX, currentY, draw]);
 
   const startGame = useCallback(() => {
-    const { piece, next } = createNewPiece();
+    const piece = createNewPiece();
     setGrid(Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(null)));
     setCurrentPiece(piece);
-    setNextPiece(next);
     setCurrentX(Math.floor((GRID_WIDTH - piece.shape[0].length) / 2));
     setCurrentY(0);
     setLocalScore(0);
-    setLines(0);
-    setLevel(1);
     setGameOver(false);
     setShowGameOver(false);
     setGameStatus('playing');
@@ -177,7 +182,7 @@ export default function TetrisGame() {
 
   useEffect(() => {
     if (gameStatus !== 'playing' || gameOver || !currentPiece) return;
-    const dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+    const dropInterval = 500;
 
     const loop = () => {
       const now = Date.now();
@@ -189,15 +194,10 @@ export default function TetrisGame() {
           
           if (linesCleared > 0) {
             const lineScores = [0, 100, 300, 500, 800];
-            setLocalScore(prev => prev + lineScores[linesCleared] * level);
-            setLines(prev => {
-              const newLines = prev + linesCleared;
-              setLevel(Math.floor(newLines / 10) + 1);
-              return newLines;
-            });
+            setLocalScore(prev => prev + lineScores[linesCleared]);
           }
 
-          const { piece: newPiece } = createNewPiece();
+          const newPiece = createNewPiece();
           if (checkCollision(newPiece, Math.floor((GRID_WIDTH - newPiece.shape[0].length) / 2), 0, clearedGrid)) {
             setGameOver(true);
             setShowGameOver(true);
@@ -206,7 +206,6 @@ export default function TetrisGame() {
           } else {
             setGrid(clearedGrid);
             setCurrentPiece(newPiece);
-            setNextPiece(PIECES[Math.floor(Math.random() * PIECES.length)]);
             setCurrentX(Math.floor((GRID_WIDTH - newPiece.shape[0].length) / 2));
             setCurrentY(0);
           }
@@ -220,85 +219,62 @@ export default function TetrisGame() {
     };
     gameLoopRef.current = setTimeout(loop, 16);
     return () => { if (gameLoopRef.current) clearTimeout(gameLoopRef.current); };
-  }, [gameStatus, currentPiece, currentX, currentY, grid, level, gameOver, isAuthenticated, score, createNewPiece, checkCollision, mergePiece, clearLines, saveScore, setGameStatus]);
+  }, [gameStatus, currentPiece, currentX, currentY, grid, gameOver, isAuthenticated, score, createNewPiece, checkCollision, mergePiece, clearLines, saveScore, setGameStatus]);
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-slate-100">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Link href="/" className="p-2 rounded-lg bg-white hover:bg-slate-200 transition-colors border border-slate-200">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
-          </Link>
-          <h1 className="text-2xl font-semibold text-slate-900">俄罗斯方块</h1>
+    <div className="min-h-screen pt-24 px-5">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/" className="text-xs text-zinc-500 hover:text-black">← 返回</Link>
+          <h1 className="text-xl">俄罗斯方块</h1>
+          <div className="text-sm">{score}</div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
+        <div className="flex justify-center mb-6">
           <div className="relative">
             <canvas
               ref={canvasRef}
               width={GRID_WIDTH * BLOCK_SIZE}
               height={GRID_HEIGHT * BLOCK_SIZE}
-              className="rounded-lg border-2 border-slate-300 shadow-lg bg-slate-800"
+              className="border border-zinc-200"
             />
             
             {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 rounded-lg">
-                <div className="text-center p-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">游戏结束</h2>
-                  <p className="text-xl text-indigo-400 mb-4">得分: {score.toLocaleString()}</p>
-                  <button onClick={startGame} className="px-5 py-2 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition-colors flex items-center gap-2 mx-auto">
-                    <RotateCcw className="w-4 h-4" /> 再来一局
+              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
+                <div className="text-center">
+                  <p className="text-sm text-zinc-500 mb-2">游戏结束</p>
+                  <p className="text-2xl font-medium mb-4">{score}</p>
+                  <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
+                    再来一局
                   </button>
                 </div>
               </div>
             )}
 
             {gameStatus === 'idle' && !showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 rounded-lg">
-                <button onClick={startGame} className="px-6 py-3 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-600 transition-colors flex items-center gap-2">
-                  <Play className="w-5 h-5" /> 开始游戏
+              <div className="absolute inset-0 flex items-center justify-center bg-white/95">
+                <button onClick={startGame} className="text-sm text-black border-b border-black pb-0.5">
+                  开始
                 </button>
               </div>
             )}
           </div>
+        </div>
 
-          <div className="flex flex-col gap-3 w-full max-w-[200px]">
-            <div className="bg-white rounded-xl p-4 border border-slate-200">
-              <p className="text-xs text-slate-500 mb-1">分数</p>
-              <p className="text-2xl font-bold text-indigo-500">{score.toLocaleString()}</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-slate-200">
-              <p className="text-xs text-slate-500 mb-1">等级</p>
-              <p className="text-2xl font-bold text-slate-700">{level}</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-slate-200">
-              <p className="text-xs text-slate-500 mb-1">消除行数</p>
-              <p className="text-2xl font-bold text-slate-700">{lines}</p>
-            </div>
-
-            <div className="flex gap-2">
-              {gameStatus === 'playing' && (
-                <button onClick={() => setGameStatus('paused')} className="flex-1 py-2 rounded-lg bg-amber-100 text-amber-600 border border-amber-200 hover:bg-amber-200 transition-colors">
-                  <Pause className="w-4 h-4 mx-auto" />
-                </button>
-              )}
-              {gameStatus === 'paused' && (
-                <button onClick={() => setGameStatus('playing')} className="flex-1 py-2 rounded-lg bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 transition-colors">
-                  <Play className="w-4 h-4 mx-auto" />
-                </button>
-              )}
-              <button onClick={startGame} className="flex-1 py-2 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors">
-                <RotateCcw className="w-4 h-4 mx-auto" />
-              </button>
-            </div>
-
-            {!isAuthenticated && (
-              <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-100 text-sm text-center">
-                <p className="text-indigo-500">登录后可保存分数</p>
-                <Link href="/login" className="text-indigo-400 hover:text-indigo-600">去登录 →</Link>
-              </div>
-            )}
-          </div>
+        <div className="flex justify-center gap-4">
+          {gameStatus === 'playing' && (
+            <button onClick={() => setGameStatus('paused')} className="text-sm text-zinc-500 hover:text-black">
+              暂停
+            </button>
+          )}
+          {gameStatus === 'paused' && (
+            <button onClick={() => setGameStatus('playing')} className="text-sm text-zinc-500 hover:text-black">
+              继续
+            </button>
+          )}
+          <button onClick={startGame} className="text-sm text-zinc-500 hover:text-black">
+            重新开始
+          </button>
         </div>
       </div>
     </div>
